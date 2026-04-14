@@ -254,10 +254,22 @@ def ingest_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
         # Small delay between successful month requests to reduce API pressure.
         time.sleep(sleep_seconds)
 
-    # Convert the collected article dictionaries into a DataFrame.
-    df = pd.DataFrame(rows)
+    # Define the expected schema explicitly so the CSV still has columns
+    # even if no articles were fetched.
+    expected_columns = [
+        "window_start",
+        "window_end",
+        "title",
+        "url",
+        "source",
+        "language",
+        "seen_date",
+        "social_image",
+        "source_country",
+    ]
 
-    # Save the raw article-level dataset as a reproducible artifact.
+    df = pd.DataFrame(rows, columns=expected_columns)
+
     output_path = Path(config["paths"]["raw_dir"]) / "raw_news.csv"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False)
