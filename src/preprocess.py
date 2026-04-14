@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 import re
 from pathlib import Path
-
+from pandas.errors import EmptyDataError
 import pandas as pd
 
 from src.utils import load_config
@@ -90,16 +90,48 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     input_path = Path(config["paths"]["raw_dir"]) / "raw_news.csv"
     output_path = Path(config["paths"]["processed_dir"]) / "news_clean.csv"
 
-    # Load the raw article-level dataset.
-    df = pd.read_csv(input_path)
+    try:
+        df = pd.read_csv(input_path)
+    except EmptyDataError:
+        logger.warning("Raw news file exists but contains no readable rows: %s", input_path)
+        df = pd.DataFrame(
+                columns=[
+                    "window_start",
+                    "window_end",
+                    "title",
+                    "url",
+                    "source",
+                    "language",
+                    "seen_date",
+                    "social_image",
+                    "source_country",
+                ]
+            )
 
-    # If the raw file is empty, save an empty processed file as well.
-    # This prevents downstream steps from failing because the file is missing.
     if df.empty:
         logger.warning("Raw news file is empty: %s", input_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(output_path, index=False)
-        return df
+
+        # Save a valid empty processed file with the expected columns.
+        empty_output = pd.DataFrame(
+            columns=[
+                "window_start",
+                "window_end",
+                "title",
+                "url",
+                "source",
+                "language",
+                "seen_date",
+                "social_image",
+                "source_country",
+                "published_at",
+                "clean_text",
+                "month",
+                "title_len",
+            ]
+        )
+    empty_output.to_csv(output_path, index=False)
+    return empty_output
 
     # Fill selected columns with empty strings to avoid errors in later text operations.
     df["title"] = df["title"].fillna("")
