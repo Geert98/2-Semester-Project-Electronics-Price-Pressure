@@ -196,6 +196,23 @@ http://127.0.0.1:8000/docs
 docker run --rm electronics-price-pressure python run_pipeline.py
 ```
 
+### Option C — Run prebuilt image from Docker Hub
+
+```bash
+docker pull geert98/eletronic_price_pressure:latest
+docker run --rm geert98/eletronic_price_pressure:latest python run_pipeline.py
+```
+
+To run the api:
+```bash
+docker run -p 8000:8000 geert98/eletronic_price_pressure:latest
+```
+
+Then open:
+```text
+http://127.0.0.1:8000/docs
+```
+
 ---
 
 ## Github Actions
