@@ -125,6 +125,8 @@ The full pipeline performs the following steps:
 10.	Generate a static HTML report for GitHub Pages
 
 ---
+No API keys or .env file are required to run the baseline pipeline.
+---
 
 ## Build, Run, and Reproduce
 
