@@ -135,7 +135,7 @@ No API keys or .env file are required to run the baseline pipeline.
 #### 1. Clone the repository (local copy)
 
 ```bash
-git clone PASTE_YOUR_REPOSITORY_URL_HERE
+git clone https://github.com/Geert98/Data-engineering-exam-April-2026/
 cd PASTE_YOUR_REPOSITORY_NAME_HERE
 ```
 
