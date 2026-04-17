@@ -172,7 +172,7 @@ http://127.0.0.1:8000/docs
 streamlit run app/streamlit_app.py
 ```
 
-### Option B — Run locally with Python
+### Option B — Run with Docker
 
 #### 1. Build Docker image
 ```bash
