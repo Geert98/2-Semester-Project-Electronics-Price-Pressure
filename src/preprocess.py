@@ -18,10 +18,10 @@ from __future__ import annotations
 
 import logging
 import re
-from pathlib import Path
-from pandas.errors import EmptyDataError
+
 import pandas as pd
 
+from src.storage import load_dataframe_from_mongo, save_dataframe_to_mongo
 from src.utils import load_config
 
 logger = logging.getLogger(__name__)
@@ -82,37 +82,15 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     pd.DataFrame
         Cleaned article-level DataFrame.
     """
-    # Load shared project configuration to find input and output file locations.
+    # Load shared project configuration to find storage locations.
     config = load_config(config_path)
 
-    # Define the raw input file created by the ingestion step
-    # and the processed output file created by this step.
-    input_path = Path(config["paths"]["raw_dir"]) / "raw_news.csv"
-    output_path = Path(config["paths"]["processed_dir"]) / "news_clean.csv"
+    raw_collection = config["storage"]["mongo"]["raw_news_collection"]
+    clean_collection = config["storage"]["mongo"]["clean_news_collection"]
 
-    try:
-        df = pd.read_csv(input_path)
-    except EmptyDataError:
-        logger.warning("Raw news file exists but contains no readable rows: %s", input_path)
-        df = pd.DataFrame(
-                columns=[
-                    "window_start",
-                    "window_end",
-                    "title",
-                    "url",
-                    "source",
-                    "language",
-                    "seen_date",
-                    "social_image",
-                    "source_country",
-                ]
-            )
-
+    df = load_dataframe_from_mongo(config, raw_collection, sort_by="seen_date")
     if df.empty:
-        logger.warning("Raw news file is empty: %s", input_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        # Save a valid empty processed file with the expected columns.
+        logger.warning("Raw news collection is empty: %s", raw_collection)
         empty_output = pd.DataFrame(
             columns=[
                 "window_start",
@@ -130,8 +108,8 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
                 "title_len",
             ]
         )
-    empty_output.to_csv(output_path, index=False)
-    return empty_output
+        save_dataframe_to_mongo(empty_output, config, clean_collection)
+        return empty_output
 
     # Fill selected columns with empty strings to avoid errors in later text operations.
     df["title"] = df["title"].fillna("")
@@ -175,13 +153,9 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     # Sort chronologically so the output file is consistent and easier to inspect.
     df = df.sort_values("published_at").reset_index(drop=True)
 
-    # Ensure the processed output directory exists before saving the file.
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    save_dataframe_to_mongo(df, config, clean_collection)
 
-    # Save the cleaned article-level dataset as a reproducible processed artifact.
-    df.to_csv(output_path, index=False)
-
-    logger.info("Saved cleaned news to %s (%s rows)", output_path, len(df))
+    logger.info("Saved cleaned news to MongoDB collection %s (%s rows)", clean_collection, len(df))
     return df
 
 

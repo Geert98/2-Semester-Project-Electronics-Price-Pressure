@@ -1,0 +1,30 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      MONGO_URI: mongodb://mongodb:27017
+      MONGO_DB_NAME: electronics_price_pressure
+    volumes:
+      - ./:/app
+    ports:
+      - "8000:8000"
+    command: uvicorn app.api:app --host 0.0.0.0 --port 8000
+
+volumes:
+  mongo_data:

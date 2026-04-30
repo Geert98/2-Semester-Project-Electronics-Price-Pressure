@@ -9,3 +9,4 @@ vaderSentiment==3.3.2
 fastapi==0.115.12
 uvicorn==0.34.0
 streamlit==1.44.1
+pymongo==4.11.1

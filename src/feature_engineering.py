@@ -26,6 +26,7 @@ import numpy as np
 import pandas as pd
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
+from src.storage import get_sqlite_path, load_dataframe_from_mongo, load_dataframe_from_sqlite
 from src.utils import load_config
 
 logger = logging.getLogger(__name__)
@@ -138,14 +139,15 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
     config = load_config(config_path)
     analyzer = SentimentIntensityAnalyzer()
 
-    # Define input and output file paths.
-    news_path = Path(config["paths"]["processed_dir"]) / "news_clean.csv"
-    fred_path = Path(config["paths"]["external_dir"]) / f"{config['fred']['series_id']}.csv"
-    output_path = Path(config["paths"]["processed_dir"]) / "model_table.csv"
+    # Load the cleaned news dataset and the FRED table from persistent storage.
+    news_collection = config["storage"]["mongo"]["clean_news_collection"]
+    news_df = load_dataframe_from_mongo(config, news_collection, sort_by="published_at")
 
-    # Load the cleaned news dataset and the raw FRED CSV.
-    news_df = pd.read_csv(news_path)
-    fred_df = pd.read_csv(fred_path)
+    fred_path = get_sqlite_path(config)
+    fred_df = load_dataframe_from_sqlite(fred_path, "fred_series")
+
+    if fred_df.empty:
+        raise ValueError(f"No FRED data found in SQLite database: {fred_path}")
 
     # Standardize FRED columns and data types.
     fred_df.columns = ["date", "ppi_value"]
@@ -273,6 +275,7 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
     )
 
     # Save the final feature table as a processed artifact.
+    output_path = Path(config["paths"]["processed_dir"]) / "model_table.csv"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False)
 

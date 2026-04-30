@@ -4,7 +4,7 @@ project:
 paths:
   raw_dir: data/raw
   processed_dir: data/processed
-  external_dir: data/external
+  db_dir: data/db
   model_dir: artifacts/models
   metrics_dir: artifacts/metrics
   predictions_dir: artifacts/predictions
@@ -12,6 +12,15 @@ paths:
 fred:
   series_id: PCU33443344
   url_template: "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
+
+storage:
+  mongo:
+    uri: "mongodb://localhost:27017"
+    database: electronics_price_pressure
+    raw_news_collection: raw_news
+    clean_news_collection: clean_news
+  sqlite:
+    fred_db_path: data/db/fred.sqlite3
 
 news:
   use_gdelt: true

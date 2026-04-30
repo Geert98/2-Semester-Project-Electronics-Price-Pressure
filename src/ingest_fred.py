@@ -17,11 +17,12 @@ from __future__ import annotations
 # because the pipeline keeps a copy of the external data it used.
 
 import logging
-from pathlib import Path
+import io
 
 import pandas as pd
 import requests
 
+from src.storage import get_sqlite_path, save_dataframe_to_sqlite
 from src.utils import load_config
 
 logger = logging.getLogger(__name__)
@@ -60,8 +61,8 @@ def ingest_fred(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     # Build the full CSV download URL using the template from config.
     url = config["fred"]["url_template"].format(series_id=series_id)
 
-    # Define where the downloaded raw external file should be stored locally.
-    output_path = Path(config["paths"]["external_dir"]) / f"{series_id}.csv"
+    sqlite_path = get_sqlite_path(config)
+    table_name = "fred_series"
 
     logger.info("Downloading FRED data from %s", url)
 
@@ -69,15 +70,8 @@ def ingest_fred(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     response = requests.get(url, timeout=30)
     response.raise_for_status()
 
-    # Ensure the external data directory exists before saving the file.
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # Save the raw response content exactly as downloaded.
-    # This acts as a raw external artifact for reproducibility.
-    output_path.write_bytes(response.content)
-
-    # Load the saved CSV into pandas for downstream processing.
-    df = pd.read_csv(output_path)
+    # Load the downloaded CSV into pandas for downstream processing.
+    df = pd.read_csv(io.BytesIO(response.content))
 
     # Standardize column names so the rest of the pipeline can rely on a fixed schema.
     df.columns = ["date", "ppi_value"]
@@ -92,7 +86,9 @@ def ingest_fred(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     # Remove invalid rows and sort chronologically.
     df = df.dropna(subset=["date", "ppi_value"]).sort_values("date").reset_index(drop=True)
 
-    logger.info("Saved FRED data to %s (%s rows)", output_path, len(df))
+    save_dataframe_to_sqlite(df, sqlite_path, table_name)
+
+    logger.info("Saved FRED data to SQLite database %s (table=%s, %s rows)", sqlite_path, table_name, len(df))
     return df
 
 

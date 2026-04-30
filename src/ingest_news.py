@@ -17,11 +17,11 @@ from __future__ import annotations
 
 import logging
 import time
-from pathlib import Path
 
 import pandas as pd
 import requests
 
+from src.storage import save_dataframe_to_mongo
 from src.utils import load_config
 
 logger = logging.getLogger(__name__)
@@ -254,7 +254,7 @@ def ingest_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
         # Small delay between successful month requests to reduce API pressure.
         time.sleep(sleep_seconds)
 
-    # Define the expected schema explicitly so the CSV still has columns
+    # Define the expected schema explicitly so the collection still has columns
     # even if no articles were fetched.
     expected_columns = [
         "window_start",
@@ -270,11 +270,10 @@ def ingest_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
 
     df = pd.DataFrame(rows, columns=expected_columns)
 
-    output_path = Path(config["paths"]["raw_dir"]) / "raw_news.csv"
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(output_path, index=False)
+    raw_collection = config["storage"]["mongo"]["raw_news_collection"]
+    save_dataframe_to_mongo(df, config, raw_collection)
 
-    logger.info("Saved raw news to %s (%s rows)", output_path, len(df))
+    logger.info("Saved raw news to MongoDB collection %s (%s rows)", raw_collection, len(df))
     return df
 
 

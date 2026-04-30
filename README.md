@@ -2,8 +2,8 @@
 
 An end-to-end MLOps-style pipeline for monitoring and predicting short-term **electronics price pressure** using:
 
-- structured market indicator data from **FRED**
-- unstructured news data from **GDELT**
+- structured market indicator data from **FRED** stored in **SQLite**
+- unstructured news data from **GDELT** stored in **MongoDB**
 - feature engineering across both sources
 - a baseline classification model
 - automated artifact generation
@@ -51,7 +51,7 @@ GitHub Pages dashboard:
 ├── configs/
 │   └── config.yaml
 ├── data/
-│   ├── external/
+│   ├── db/
 │   ├── processed/
 │   └── raw/
 ├── docs/
@@ -65,8 +65,10 @@ GitHub Pages dashboard:
 │   ├── ingest_news.py
 │   ├── predict.py
 │   ├── preprocess.py
+│   ├── storage.py
 │   ├── train.py
 │   └── utils.py
+├── docker-compose.yml
 ├── .dockerignore
 ├── Dockerfile
 ├── requirements.txt
@@ -80,6 +82,9 @@ GitHub Pages dashboard:
 Data ingestion:
 • src/ingest_fred.py
 • src/ingest_news.py
+
+Storage:
+• src/storage.py
 
 Preprocessing
 	•	src/preprocess.py
@@ -113,11 +118,11 @@ Automation
 ## Pipeline Overview
 
 The full pipeline performs the following steps:
-1.	Download the FRED producer price index series
-2.	Download monthly news data from GDELT
-3.	Clean and preprocess the news articles
+1.	Download the FRED producer price index series and persist it in SQLite
+2.	Download monthly news data from GDELT and persist it in MongoDB
+3.	Clean and preprocess the news articles in MongoDB
 4.	Aggregate article-level data to monthly features
-5.	Build lagged and rolling structured features from FRED
+5.	Build lagged and rolling structured features from SQLite-backed FRED data
 6.	Construct the next-period target class
 7.	Train a baseline Logistic Regression model
 8.	Evaluate the model on a time-based holdout test set
@@ -125,7 +130,7 @@ The full pipeline performs the following steps:
 10.	Generate a static HTML report for GitHub Pages
 
 ---
-No API keys or .env file are required to run the baseline pipeline.
+MongoDB is required for the news pipeline, and the recommended way to run the stack locally is via Docker Compose.
 ---
 
 ## Build, Run, and Reproduce
@@ -174,38 +179,33 @@ http://127.0.0.1:8000/docs
 streamlit run app/streamlit_app.py
 ```
 
-### Option B — Run with Docker
+### Option B — Run with Docker Compose
 
-#### 1. Build Docker image
+#### 1. Start MongoDB and the API container
 ```bash
-docker build -t electronics-price-pressure .
+docker compose up --build
 ```
 
-#### 2. Run FastAPI service in Docker
-```bash
-docker run -p 8000:8000 electronics-price-pressure
-```
-
-#### 3. Open in browser
+#### 2. Open the API docs
 ```bash
 http://127.0.0.1:8000/docs
 ```
 
-#### 4. Run full pipeline in Docker
+#### 3. Run the full pipeline inside the app container
 ```bash
-docker run --rm electronics-price-pressure python run_pipeline.py
+docker compose exec app python run_pipeline.py
 ```
 
-### Option C — Run prebuilt image from Docker Hub
+### Option C — Run with Docker only
 
 ```bash
-docker pull geert98/eletronic_price_pressure:latest
-docker run --rm geert98/eletronic_price_pressure:latest python run_pipeline.py
+docker build -t electronics-price-pressure .
+docker run --rm -e MONGO_URI=mongodb://host.docker.internal:27017 electronics-price-pressure python run_pipeline.py
 ```
 
-To run the api:
+To run the API:
 ```bash
-docker run -p 8000:8000 geert98/eletronic_price_pressure:latest
+docker run -p 8000:8000 -e MONGO_URI=mongodb://host.docker.internal:27017 electronics-price-pressure
 ```
 
 Then open:
