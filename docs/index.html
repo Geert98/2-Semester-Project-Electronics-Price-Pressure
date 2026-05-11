@@ -285,31 +285,31 @@
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Predicted Pressure</div>
-                        <div class="metric-value">High</div>
+                        <div class="metric-value">Medium</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Medium Probability</div>
-                        <div class="metric-value">0.34%</div>
+                        <div class="metric-value">74.91%</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">High Probability</div>
-                        <div class="metric-value">99.66%</div>
+                        <div class="metric-value">7.53%</div>
                     </div>
                 </div>
 
                 <div class="subsection-title">Prediction Probabilities</div>
                 <div class="probabilities">
                     <div class="bar-row">
-                        <div class="bar-label"><span>Low</span><span>0.00%</span></div>
-                        <div class="bar-track"><div class="bar-fill" style="width:0.003575511974867634%"></div></div>
+                        <div class="bar-label"><span>Low</span><span>17.56%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="width:17.55880070008833%"></div></div>
                     </div>
                     <div class="bar-row">
-                        <div class="bar-label"><span>Medium</span><span>0.34%</span></div>
-                        <div class="bar-track"><div class="bar-fill" style="width:0.33799828055375003%"></div></div>
+                        <div class="bar-label"><span>Medium</span><span>74.91%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="width:74.90763375550998%"></div></div>
                     </div>
                     <div class="bar-row">
-                        <div class="bar-label"><span>High</span><span>99.66%</span></div>
-                        <div class="bar-track"><div class="bar-fill" style="width:99.65842620747138%"></div></div>
+                        <div class="bar-label"><span>High</span><span>7.53%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="width:7.53356554440168%"></div></div>
                     </div>
                 </div>
             </section>
@@ -319,11 +319,11 @@
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-label">Accuracy</div>
-                        <div class="metric-value">0.583</div>
+                        <div class="metric-value">0.417</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Macro F1</div>
-                        <div class="metric-value">0.246</div>
+                        <div class="metric-value">0.311</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Train Rows</div>
@@ -333,6 +333,24 @@
                         <div class="metric-label">Test Rows</div>
                         <div class="metric-value">12</div>
                     </div>
+                </div>
+
+                <div class="subsection-title">Model Selection</div>
+                <div class="table-card">
+                    <h3>Selected Model: gradient_boosting</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Accuracy</th>
+                                <th>Macro F1</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>logistic_regression</td><td>0.583</td><td>0.246</td></tr>
+<tr><td>gradient_boosting</td><td>0.417</td><td>0.311</td></tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 <div class="subsection-title">Class Distributions</div>
@@ -363,8 +381,9 @@
                         <h3>Predicted Distribution</h3>
                         <table>
                             <tbody>
-                                <tr><td>high</td><td>11</td></tr>
-<tr><td>low</td><td>1</td></tr>
+                                <tr><td>high</td><td>7</td></tr>
+<tr><td>low</td><td>3</td></tr>
+<tr><td>medium</td><td>2</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -380,7 +399,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr><th>low</th><td>0</td><td>0</td><td>1</td></tr><tr><th>medium</th><td>0</td><td>0</td><td>3</td></tr><tr><th>high</th><td>1</td><td>0</td><td>7</td></tr>
+            <tr><th>low</th><td>0</td><td>0</td><td>1</td></tr><tr><th>medium</th><td>0</td><td>1</td><td>2</td></tr><tr><th>high</th><td>3</td><td>1</td><td>4</td></tr>
         </tbody>
     </table>
     

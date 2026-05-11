@@ -72,3 +72,7 @@ target:
 model:
   test_size_months: 12
   random_state: 42
+  candidates:
+    - logistic_regression
+    - gradient_boosting
+  selection_metric: macro_f1

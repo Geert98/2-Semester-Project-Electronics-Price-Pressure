@@ -60,6 +60,23 @@ def _dict_to_html_rows(data: dict) -> str:
     return "\n".join(rows)
 
 
+def _model_results_to_html_rows(model_results: dict) -> str:
+    """Render model comparison metrics as HTML rows."""
+    if not model_results:
+        return "<tr><td colspan='3'>No model comparison available.</td></tr>"
+
+    rows = []
+    for model_name, result in model_results.items():
+        rows.append(
+            "<tr>"
+            f"<td>{escape(str(model_name))}</td>"
+            f"<td>{_format_float(result.get('accuracy'))}</td>"
+            f"<td>{_format_float(result.get('macro_f1'))}</td>"
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
 def _confusion_matrix_html(confusion: list[list[int]]) -> str:
     """Render the confusion matrix as an HTML table."""
     if not confusion or len(confusion) != 3:
@@ -335,10 +352,12 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
     macro_f1 = _format_float(metrics.get("macro_f1"))
     n_rows_train = _safe_get(metrics, "n_rows_train")
     n_rows_test = _safe_get(metrics, "n_rows_test")
+    best_model = _safe_get(metrics, "best_model")
 
     train_dist_html = _dict_to_html_rows(metrics.get("train_class_distribution", {}))
     test_dist_html = _dict_to_html_rows(metrics.get("test_class_distribution", {}))
     pred_dist_html = _dict_to_html_rows(metrics.get("predicted_class_distribution", {}))
+    model_results_html = _model_results_to_html_rows(metrics.get("model_results", {}))
 
     confusion_html = _confusion_matrix_html(metrics.get("confusion_matrix", []))
     articles_html = _articles_to_html_rows(recent_articles)
@@ -681,6 +700,23 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
                         <div class="metric-label">Test Rows</div>
                         <div class="metric-value">{n_rows_test}</div>
                     </div>
+                </div>
+
+                <div class="subsection-title">Model Selection</div>
+                <div class="table-card">
+                    <h3>Selected Model: {best_model}</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Accuracy</th>
+                                <th>Macro F1</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {model_results_html}
+                        </tbody>
+                    </table>
                 </div>
 
                 <div class="subsection-title">Class Distributions</div>
