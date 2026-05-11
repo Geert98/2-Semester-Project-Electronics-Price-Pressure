@@ -204,6 +204,52 @@ def _news_signal_to_html_rows(trend: list[dict]) -> str:
     return "\n".join(rows)
 
 
+def _load_external_indicator_trend(config: dict, limit: int = 18) -> list[dict]:
+    """Load recent external structured indicator values from the model table."""
+    model_table_path = Path(config["paths"]["processed_dir"]) / "model_table.csv"
+    if not model_table_path.exists():
+        return []
+
+    df = pd.read_csv(model_table_path)
+    indicator_cols = [
+        col
+        for col in ["gscpi", "wti_oil_price"]
+        if col in df.columns
+    ]
+    if df.empty or not indicator_cols:
+        return []
+
+    trend_df = df[["month", *indicator_cols]].tail(limit).copy()
+    trend_df["month"] = pd.to_datetime(trend_df["month"], errors="coerce").dt.strftime("%Y-%m")
+
+    for col in indicator_cols:
+        trend_df[col] = pd.to_numeric(trend_df[col], errors="coerce")
+
+    trend_df = trend_df.fillna("")
+    return trend_df.to_dict(orient="records")
+
+
+def _external_indicators_to_html_rows(indicators: list[dict]) -> str:
+    """Render recent external indicator values as HTML table rows."""
+    if not indicators:
+        return "<tr><td colspan='3'>No external indicator data available.</td></tr>"
+
+    rows = []
+    for row in indicators:
+        month = escape(str(row.get("month", "")))
+        gscpi = _format_float(row.get("gscpi"), decimals=2)
+        wti = _format_float(row.get("wti_oil_price"), decimals=2)
+        rows.append(
+            "<tr>"
+            f"<td>{month}</td>"
+            f"<td>{gscpi}</td>"
+            f"<td>{wti}</td>"
+            "</tr>"
+        )
+
+    return "\n".join(rows)
+
+
 def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
     """
     Generate a static HTML dashboard from saved pipeline artifacts.
@@ -241,6 +287,7 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
     metrics_json_path = docs_dir / "train_metrics.json"
     articles_json_path = docs_dir / "news_articles.json"
     news_signal_json_path = docs_dir / "news_signal_trend.json"
+    external_indicators_json_path = docs_dir / "external_indicators.json"
 
     # Load latest prediction artifact if it exists.
     prediction = {}
@@ -257,6 +304,7 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
 
     recent_articles = _load_recent_articles(config, limit=20)
     news_signal_trend = _load_news_signal_trend(config, limit=18)
+    external_indicator_trend = _load_external_indicator_trend(config, limit=18)
 
     # Save copies of the key artifacts into docs/ as well.
     # This is useful for transparency and possible future frontend extensions.
@@ -271,6 +319,9 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
 
     with open(news_signal_json_path, "w", encoding="utf-8") as f:
         json.dump(news_signal_trend, f, indent=2)
+
+    with open(external_indicators_json_path, "w", encoding="utf-8") as f:
+        json.dump(external_indicator_trend, f, indent=2)
 
     # Extract prediction fields.
     pred_month = prediction.get("month", "N/A")
@@ -292,6 +343,7 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
     confusion_html = _confusion_matrix_html(metrics.get("confusion_matrix", []))
     articles_html = _articles_to_html_rows(recent_articles)
     news_signal_html = _news_signal_to_html_rows(news_signal_trend)
+    external_indicators_html = _external_indicators_to_html_rows(external_indicator_trend)
 
     # Create the static HTML page.
     html = f"""<!DOCTYPE html>
@@ -679,6 +731,22 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
                 </thead>
                 <tbody>
                     {news_signal_html}
+                </tbody>
+            </table>
+        </section>
+
+        <section class="panel wide-panel">
+            <h2>External Market Indicators</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>GSCPI</th>
+                        <th>WTI Oil Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {external_indicators_html}
                 </tbody>
             </table>
         </section>

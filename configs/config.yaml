@@ -12,6 +12,12 @@ paths:
 fred:
   series_id: PCU33443344
   url_template: "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
+  indicators:
+    - source: ny_fed_gscpi
+      name: gscpi
+      url: "https://www.newyorkfed.org/medialibrary/research/interactives/gscpi/downloads/gscpi_data.xlsx"
+    - series_id: DCOILWTICO
+      name: wti_oil_price
 
 storage:
   mongo:

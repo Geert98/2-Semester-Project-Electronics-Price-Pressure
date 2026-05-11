@@ -118,7 +118,7 @@ Automation
 ## Pipeline Overview
 
 The full pipeline performs the following steps:
-1.	Download the FRED producer price index series and persist it in SQLite
+1.	Download the FRED producer price index series, WTI oil prices, and the New York Fed Global Supply Chain Pressure Index, then persist them in SQLite
 2.	Download monthly news data from The Guardian Open Platform or GDELT and persist it in MongoDB
 3.	Clean and preprocess the news articles in MongoDB
 4.	Aggregate article-level data to monthly features

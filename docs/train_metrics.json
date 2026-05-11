@@ -1,14 +1,14 @@
 {
-  "n_rows_total": 492,
-  "n_rows_train": 480,
+  "n_rows_total": 338,
+  "n_rows_train": 326,
   "n_rows_test": 12,
-  "feature_count": 22,
+  "feature_count": 30,
   "accuracy": 0.5833333333333334,
   "macro_f1": 0.24561403508771928,
   "train_class_distribution": {
-    "low": 164,
-    "medium": 163,
-    "high": 153
+    "low": 121,
+    "medium": 110,
+    "high": 95
   },
   "test_class_distribution": {
     "high": 8,

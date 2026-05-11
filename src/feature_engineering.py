@@ -116,6 +116,36 @@ def _assign_target_class(value: float, low_cut: float, high_cut: float) -> str |
     return "high"
 
 
+def _load_fred_indicators(config: dict) -> pd.DataFrame:
+    """
+    Load optional monthly FRED indicator features from SQLite.
+    """
+    fred_path = get_sqlite_path(config)
+    indicators_df = load_dataframe_from_sqlite(fred_path, "fred_indicators")
+    if indicators_df.empty:
+        return pd.DataFrame()
+
+    indicators_df["month"] = pd.to_datetime(indicators_df["month"], errors="coerce")
+    indicators_df = indicators_df.dropna(subset=["month"]).sort_values("month").reset_index(drop=True)
+
+    indicator_cols = [col for col in indicators_df.columns if col != "month"]
+    for col in indicator_cols:
+        indicators_df[col] = pd.to_numeric(indicators_df[col], errors="coerce")
+
+    return indicators_df
+
+
+def _add_indicator_features(df: pd.DataFrame, indicator_cols: list[str]) -> pd.DataFrame:
+    """
+    Add simple change and lag features for external monthly indicators.
+    """
+    for col in indicator_cols:
+        df[f"{col}_pct_change"] = df[col].pct_change() * 100
+        df[f"{col}_lag_1"] = df[col].shift(1)
+        df[f"{col}_pct_change_lag_1"] = df[f"{col}_pct_change"].shift(1)
+    return df
+
+
 def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     """
     Build the monthly model table by combining processed news data and FRED data.
@@ -145,6 +175,7 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
 
     fred_path = get_sqlite_path(config)
     fred_df = load_dataframe_from_sqlite(fred_path, "fred_series")
+    indicators_df = _load_fred_indicators(config)
 
     if fred_df.empty:
         raise ValueError(f"No FRED data found in SQLite database: {fred_path}")
@@ -223,9 +254,19 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
     # Merge the structured PPI features with the aggregated monthly news features.
     df = monthly_ppi.merge(monthly_news, on="month", how="left")
 
+    indicator_cols: list[str] = []
+    if not indicators_df.empty:
+        indicator_cols = [col for col in indicators_df.columns if col != "month"]
+        df = df.merge(indicators_df, on="month", how="left")
+        df[indicator_cols] = df[indicator_cols].ffill()
+
     # Replace missing news-based features with 0.
     # This allows the model table to remain complete even in months with no articles.
-    news_feature_cols = [col for col in df.columns if col not in ["month", "ppi_value"]]
+    news_feature_cols = [
+        col
+        for col in df.columns
+        if col not in ["month", "ppi_value", *indicator_cols]
+    ]
     df[news_feature_cols] = df[news_feature_cols].fillna(0)
 
     # Sort by time to prepare lagged and rolling features.
@@ -237,6 +278,7 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
     df["ppi_pct_change_lag_1"] = df["ppi_pct_change"].shift(1)
     df["ppi_ma_3"] = df["ppi_value"].rolling(window=3).mean().shift(1)
     df["ppi_std_3"] = df["ppi_value"].rolling(window=3).std().shift(1)
+    df = _add_indicator_features(df, indicator_cols)
 
     # Define the supervised learning target as the next month's percentage change.
     # This means the model will use information available at month t
@@ -271,6 +313,7 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
             "ppi_ma_3",
             "ppi_std_3",
             "target_class",
+            *indicator_cols,
         ]
     )
 
