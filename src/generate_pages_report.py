@@ -143,6 +143,67 @@ def _articles_to_html_rows(articles: list[dict]) -> str:
     return "\n".join(rows)
 
 
+def _load_news_signal_trend(config: dict, limit: int = 18) -> list[dict]:
+    """Load monthly news volume and sentiment from the processed model table."""
+    model_table_path = Path(config["paths"]["processed_dir"]) / "model_table.csv"
+    if not model_table_path.exists():
+        return []
+
+    df = pd.read_csv(model_table_path)
+    required_cols = {"month", "article_count", "avg_sentiment"}
+    if df.empty or not required_cols.issubset(df.columns):
+        return []
+
+    trend_df = df[["month", "article_count", "avg_sentiment"]].tail(limit).copy()
+    trend_df["month"] = pd.to_datetime(trend_df["month"], errors="coerce").dt.strftime("%Y-%m")
+    trend_df["article_count"] = pd.to_numeric(
+        trend_df["article_count"],
+        errors="coerce",
+    ).fillna(0).astype(int)
+    trend_df["avg_sentiment"] = pd.to_numeric(
+        trend_df["avg_sentiment"],
+        errors="coerce",
+    ).fillna(0.0)
+
+    return trend_df.to_dict(orient="records")
+
+
+def _news_signal_to_html_rows(trend: list[dict]) -> str:
+    """Render monthly news signal rows with compact in-table bars."""
+    if not trend:
+        return "<tr><td colspan='4'>No monthly news signal data available.</td></tr>"
+
+    max_count = max(int(row.get("article_count", 0)) for row in trend) or 1
+    rows = []
+    for row in trend:
+        month = escape(str(row.get("month", "")))
+        article_count = int(row.get("article_count", 0))
+        sentiment = float(row.get("avg_sentiment", 0.0))
+        volume_width = min(100.0, (article_count / max_count) * 100)
+        sentiment_width = min(100.0, abs(sentiment) * 100)
+        sentiment_class = "sentiment-positive" if sentiment >= 0 else "sentiment-negative"
+
+        rows.append(
+            "<tr>"
+            f"<td>{month}</td>"
+            f"<td>{article_count}</td>"
+            "<td>"
+            "<div class=\"mini-bar-track\">"
+            f"<div class=\"mini-bar-fill volume-fill\" style=\"width:{volume_width:.1f}%\"></div>"
+            "</div>"
+            "</td>"
+            "<td>"
+            f"<span class=\"sentiment-value\">{sentiment:.3f}</span>"
+            "<div class=\"mini-bar-track sentiment-track\">"
+            f"<div class=\"mini-bar-fill {sentiment_class}\" style=\"width:{sentiment_width:.1f}%\"></div>"
+            "</div>"
+            "</td>"
+            "</tr>"
+        )
+
+    return "\n".join(rows)
+
+
 def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
     """
     Generate a static HTML dashboard from saved pipeline artifacts.
@@ -179,6 +240,7 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
     prediction_json_path = docs_dir / "latest_prediction.json"
     metrics_json_path = docs_dir / "train_metrics.json"
     articles_json_path = docs_dir / "news_articles.json"
+    news_signal_json_path = docs_dir / "news_signal_trend.json"
 
     # Load latest prediction artifact if it exists.
     prediction = {}
@@ -194,6 +256,7 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
             metrics = json.load(f)
 
     recent_articles = _load_recent_articles(config, limit=20)
+    news_signal_trend = _load_news_signal_trend(config, limit=18)
 
     # Save copies of the key artifacts into docs/ as well.
     # This is useful for transparency and possible future frontend extensions.
@@ -205,6 +268,9 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
 
     with open(articles_json_path, "w", encoding="utf-8") as f:
         json.dump(recent_articles, f, indent=2)
+
+    with open(news_signal_json_path, "w", encoding="utf-8") as f:
+        json.dump(news_signal_trend, f, indent=2)
 
     # Extract prediction fields.
     pred_month = prediction.get("month", "N/A")
@@ -225,6 +291,7 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
 
     confusion_html = _confusion_matrix_html(metrics.get("confusion_matrix", []))
     articles_html = _articles_to_html_rows(recent_articles)
+    news_signal_html = _news_signal_to_html_rows(news_signal_trend)
 
     # Create the static HTML page.
     html = f"""<!DOCTYPE html>
@@ -421,6 +488,41 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
             margin-top: 24px;
         }}
 
+        .mini-bar-track {{
+            width: 100%;
+            min-width: 90px;
+            height: 12px;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            overflow: hidden;
+        }}
+
+        .mini-bar-fill {{
+            height: 100%;
+            border-radius: 999px;
+        }}
+
+        .volume-fill {{
+            background: var(--accent-2);
+        }}
+
+        .sentiment-positive {{
+            background: var(--accent);
+        }}
+
+        .sentiment-negative {{
+            background: var(--danger);
+        }}
+
+        .sentiment-value {{
+            display: inline-block;
+            min-width: 58px;
+            margin-bottom: 5px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }}
+
         .matrix-table th,
         .matrix-table td {{
             text-align: center;
@@ -563,6 +665,23 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
                 {confusion_html}
             </section>
         </div>
+
+        <section class="panel wide-panel">
+            <h2>Monthly News Signal</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Articles</th>
+                        <th>Volume</th>
+                        <th>Avg Sentiment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {news_signal_html}
+                </tbody>
+            </table>
+        </section>
 
         <section class="panel wide-panel">
             <h2>Recent Ingested Articles</h2>

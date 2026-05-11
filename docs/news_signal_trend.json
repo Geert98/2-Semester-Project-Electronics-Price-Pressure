@@ -1,0 +1,92 @@
+[
+  {
+    "month": "2024-09",
+    "article_count": 1,
+    "avg_sentiment": -0.6705
+  },
+  {
+    "month": "2024-10",
+    "article_count": 2,
+    "avg_sentiment": -0.09895
+  },
+  {
+    "month": "2024-11",
+    "article_count": 1,
+    "avg_sentiment": 0.4215
+  },
+  {
+    "month": "2024-12",
+    "article_count": 1,
+    "avg_sentiment": -0.1027
+  },
+  {
+    "month": "2025-01",
+    "article_count": 1,
+    "avg_sentiment": 0.0
+  },
+  {
+    "month": "2025-02",
+    "article_count": 11,
+    "avg_sentiment": -0.0742818181818181
+  },
+  {
+    "month": "2025-03",
+    "article_count": 6,
+    "avg_sentiment": -0.0465333333333333
+  },
+  {
+    "month": "2025-04",
+    "article_count": 25,
+    "avg_sentiment": -0.029444
+  },
+  {
+    "month": "2025-05",
+    "article_count": 6,
+    "avg_sentiment": -0.2097666666666666
+  },
+  {
+    "month": "2025-06",
+    "article_count": 5,
+    "avg_sentiment": 0.12704
+  },
+  {
+    "month": "2025-07",
+    "article_count": 7,
+    "avg_sentiment": -0.1809285714285714
+  },
+  {
+    "month": "2025-08",
+    "article_count": 12,
+    "avg_sentiment": -0.0405166666666666
+  },
+  {
+    "month": "2025-09",
+    "article_count": 1,
+    "avg_sentiment": -0.296
+  },
+  {
+    "month": "2025-10",
+    "article_count": 11,
+    "avg_sentiment": -0.1261272727272727
+  },
+  {
+    "month": "2025-11",
+    "article_count": 9,
+    "avg_sentiment": 0.0082555555555555
+  },
+  {
+    "month": "2025-12",
+    "article_count": 4,
+    "avg_sentiment": -0.21965
+  },
+  {
+    "month": "2026-01",
+    "article_count": 2,
+    "avg_sentiment": 0.0897499999999999
+  },
+  {
+    "month": "2026-02",
+    "article_count": 4,
+    "avg_sentiment": -0.18485
+  }
+]

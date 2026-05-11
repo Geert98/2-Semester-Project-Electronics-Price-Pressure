@@ -192,6 +192,41 @@
             margin-top: 24px;
         }
 
+        .mini-bar-track {
+            width: 100%;
+            min-width: 90px;
+            height: 12px;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .mini-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+        }
+
+        .volume-fill {
+            background: var(--accent-2);
+        }
+
+        .sentiment-positive {
+            background: var(--accent);
+        }
+
+        .sentiment-negative {
+            background: var(--danger);
+        }
+
+        .sentiment-value {
+            display: inline-block;
+            min-width: 58px;
+            margin-bottom: 5px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+
         .matrix-table th,
         .matrix-table td {
             text-align: center;
@@ -351,6 +386,40 @@
     
             </section>
         </div>
+
+        <section class="panel wide-panel">
+            <h2>Monthly News Signal</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Articles</th>
+                        <th>Volume</th>
+                        <th>Avg Sentiment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>2024-09</td><td>1</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:4.0%"></div></div></td><td><span class="sentiment-value">-0.670</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:67.0%"></div></div></td></tr>
+<tr><td>2024-10</td><td>2</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:8.0%"></div></div></td><td><span class="sentiment-value">-0.099</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:9.9%"></div></div></td></tr>
+<tr><td>2024-11</td><td>1</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:4.0%"></div></div></td><td><span class="sentiment-value">0.421</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:42.1%"></div></div></td></tr>
+<tr><td>2024-12</td><td>1</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:4.0%"></div></div></td><td><span class="sentiment-value">-0.103</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:10.3%"></div></div></td></tr>
+<tr><td>2025-01</td><td>1</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:4.0%"></div></div></td><td><span class="sentiment-value">0.000</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:0.0%"></div></div></td></tr>
+<tr><td>2025-02</td><td>11</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:44.0%"></div></div></td><td><span class="sentiment-value">-0.074</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:7.4%"></div></div></td></tr>
+<tr><td>2025-03</td><td>6</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:24.0%"></div></div></td><td><span class="sentiment-value">-0.047</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:4.7%"></div></div></td></tr>
+<tr><td>2025-04</td><td>25</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:100.0%"></div></div></td><td><span class="sentiment-value">-0.029</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:2.9%"></div></div></td></tr>
+<tr><td>2025-05</td><td>6</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:24.0%"></div></div></td><td><span class="sentiment-value">-0.210</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:21.0%"></div></div></td></tr>
+<tr><td>2025-06</td><td>5</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:20.0%"></div></div></td><td><span class="sentiment-value">0.127</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:12.7%"></div></div></td></tr>
+<tr><td>2025-07</td><td>7</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:28.0%"></div></div></td><td><span class="sentiment-value">-0.181</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:18.1%"></div></div></td></tr>
+<tr><td>2025-08</td><td>12</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:48.0%"></div></div></td><td><span class="sentiment-value">-0.041</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:4.1%"></div></div></td></tr>
+<tr><td>2025-09</td><td>1</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:4.0%"></div></div></td><td><span class="sentiment-value">-0.296</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:29.6%"></div></div></td></tr>
+<tr><td>2025-10</td><td>11</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:44.0%"></div></div></td><td><span class="sentiment-value">-0.126</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:12.6%"></div></div></td></tr>
+<tr><td>2025-11</td><td>9</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:36.0%"></div></div></td><td><span class="sentiment-value">0.008</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:0.8%"></div></div></td></tr>
+<tr><td>2025-12</td><td>4</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:16.0%"></div></div></td><td><span class="sentiment-value">-0.220</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:22.0%"></div></div></td></tr>
+<tr><td>2026-01</td><td>2</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:8.0%"></div></div></td><td><span class="sentiment-value">0.090</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:9.0%"></div></div></td></tr>
+<tr><td>2026-02</td><td>4</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:16.0%"></div></div></td><td><span class="sentiment-value">-0.185</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:18.5%"></div></div></td></tr>
+                </tbody>
+            </table>
+        </section>
 
         <section class="panel wide-panel">
             <h2>Recent Ingested Articles</h2>
