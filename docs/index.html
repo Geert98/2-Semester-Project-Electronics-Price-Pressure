@@ -179,6 +179,19 @@
             font-weight: 600;
         }
 
+        a {
+            color: #93c5fd;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .wide-panel {
+            margin-top: 24px;
+        }
+
         .matrix-table th,
         .matrix-table td {
             text-align: center;
@@ -241,27 +254,27 @@
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Medium Probability</div>
-                        <div class="metric-value">11.94%</div>
+                        <div class="metric-value">0.02%</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">High Probability</div>
-                        <div class="metric-value">88.04%</div>
+                        <div class="metric-value">99.98%</div>
                     </div>
                 </div>
 
                 <div class="subsection-title">Prediction Probabilities</div>
                 <div class="probabilities">
                     <div class="bar-row">
-                        <div class="bar-label"><span>Low</span><span>0.02%</span></div>
-                        <div class="bar-track"><div class="bar-fill" style="width:0.01861718985794%"></div></div>
+                        <div class="bar-label"><span>Low</span><span>0.00%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="width:0.00016170160362303685%"></div></div>
                     </div>
                     <div class="bar-row">
-                        <div class="bar-label"><span>Medium</span><span>11.94%</span></div>
-                        <div class="bar-track"><div class="bar-fill" style="width:11.94015016739583%"></div></div>
+                        <div class="bar-label"><span>Medium</span><span>0.02%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="width:0.02276344376549%"></div></div>
                     </div>
                     <div class="bar-row">
-                        <div class="bar-label"><span>High</span><span>88.04%</span></div>
-                        <div class="bar-track"><div class="bar-fill" style="width:88.04123264274621%"></div></div>
+                        <div class="bar-label"><span>High</span><span>99.98%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="width:99.9770748546309%"></div></div>
                     </div>
                 </div>
             </section>
@@ -271,11 +284,11 @@
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-label">Accuracy</div>
-                        <div class="metric-value">0.667</div>
+                        <div class="metric-value">0.583</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Macro F1</div>
-                        <div class="metric-value">0.425</div>
+                        <div class="metric-value">0.246</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Train Rows</div>
@@ -315,9 +328,8 @@
                         <h3>Predicted Distribution</h3>
                         <table>
                             <tbody>
-                                <tr><td>high</td><td>8</td></tr>
-<tr><td>medium</td><td>2</td></tr>
-<tr><td>low</td><td>2</td></tr>
+                                <tr><td>high</td><td>11</td></tr>
+<tr><td>low</td><td>1</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -333,12 +345,48 @@
             </tr>
         </thead>
         <tbody>
-            <tr><th>low</th><td>0</td><td>1</td><td>0</td></tr><tr><th>medium</th><td>1</td><td>1</td><td>1</td></tr><tr><th>high</th><td>1</td><td>0</td><td>7</td></tr>
+            <tr><th>low</th><td>0</td><td>0</td><td>1</td></tr><tr><th>medium</th><td>0</td><td>0</td><td>3</td></tr><tr><th>high</th><td>1</td><td>0</td><td>7</td></tr>
         </tbody>
     </table>
     
             </section>
         </div>
+
+        <section class="panel wide-panel">
+            <h2>Recent Ingested Articles</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Published</th>
+                        <th>Provider</th>
+                        <th>Source</th>
+                        <th>Article</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>2026-03-06</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/world/live/2026/mar/05/iran-war-latest-updates-canada-carney-trump-israel-tehran-strikes" target="_blank" rel="noopener noreferrer">Explosions heard across Tel Aviv  – as it happened</a></td></tr>
+<tr><td>2026-03-05</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/live/2026/mar/05/wizz-air-profits-warning-iran-travel-middle-east-crisis-airlines-china-diesel-gasoline-exports-news-updates" target="_blank" rel="noopener noreferrer">Slower UK interest rate cuts likely as some mortgage providers hike rates; oil and gas prices rising again – as it happened</a></td></tr>
+<tr><td>2026-03-05</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/2026/mar/05/oil-price-continues-to-rise-amid-middle-east-crisis-but-stock-markets-rebound-across-asia" target="_blank" rel="noopener noreferrer">Oil price continues to rise amid Middle East crisis but stock markets rebound across Asia</a></td></tr>
+<tr><td>2026-02-24</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/live/2026/feb/24/trump-new-global-tariffs-trade-latest-business-news" target="_blank" rel="noopener noreferrer">Trump’s new global tariffs kick in at 10%; Bank of England governor says March rate cut ‘open question’ – as it happened</a></td></tr>
+<tr><td>2026-02-16</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/environment/2026/feb/16/critical-minerals-shortages-jd-vance-trading-bloc-analysis" target="_blank" rel="noopener noreferrer">The US is merely the latest to join the global rush to hoard critical minerals</a></td></tr>
+<tr><td>2026-02-13</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/live/2026/feb/13/trump-metal-tariffs-natwest-bankers-bonus-latest-news-updates" target="_blank" rel="noopener noreferrer">Trump ‘plans to roll back’ some metal tariffs; US inflation weaker than expected in January - business live</a></td></tr>
+<tr><td>2026-02-05</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/2026/feb/05/trump-administration-cornish-tin-mine-south-crofty" target="_blank" rel="noopener noreferrer">Cornish tin mine could reopen with Trump administration investment</a></td></tr>
+<tr><td>2026-01-15</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/live/2026/jan/15/uk-gdp-economy-growth-stagnation-november-rachel-reeves-pound-ftse-100-business-live-news-updates" target="_blank" rel="noopener noreferrer">UK economy beats forecasts with 0.3% growth in November; Ofwat investigating South East Water over outages – as it happened</a></td></tr>
+<tr><td>2026-01-13</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/live/2026/jan/13/oil-price-trump-iran-trading-partners-tariffs-supreme-court-business-live-news-updates" target="_blank" rel="noopener noreferrer">Twelve top central bankers defend Fed’s Jerome Powell over DoJ investigation; oil hits two-month high as Trump threatens Iran’s trading partners – as it happened</a></td></tr>
+<tr><td>2025-12-11</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/live/2025/dec/11/oracle-shares-slide-earnings-ai-bubble-stock-markets-bank-of-england-business-live-news-updates" target="_blank" rel="noopener noreferrer">Green biotech firms to open factories at Grangemouth; Oracle shares tumble 15% after results disappoint – as it happened</a></td></tr>
+<tr><td>2025-12-10</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/live/2025/dec/10/elon-musk-spacex-one-point-five-trillion-valuation-silver-record-stock-markets-federal-reserve-business-live-news-updates" target="_blank" rel="noopener noreferrer">Evoke considers sale or break-up after budget tax hikes; SpaceX aims for $1.7tn valuation – as it happened</a></td></tr>
+<tr><td>2025-12-10</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/us-news/live/2025/dec/09/hegseth-rubio-venezuela-trump-tariffs-pennsylvania-nvidia-china-us-politics-latest-news-updates" target="_blank" rel="noopener noreferrer">Trump speech on affordability ramps up bigotry and false statements – as it happened</a></td></tr>
+<tr><td>2025-12-09</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/live/2025/dec/09/trump-nvidia-powerful-ai-chips-china-stock-markets-bonds-inflation-business-live-news-updates" target="_blank" rel="noopener noreferrer">BoE predicts budget measures will lower inflation, and denies uncertainty caused unusual bond market volatility – as it happened</a></td></tr>
+<tr><td>2025-11-16</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/environment/2025/nov/16/trump-rare-mineral-dependence-china" target="_blank" rel="noopener noreferrer">Inside Trump’s scramble to reduce US dependence on Chinese rare-earth metals</a></td></tr>
+<tr><td>2025-11-14</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/2025/nov/14/china-voices-extreme-disappointment-with-dutch-minister-at-centre-of-car-chip-row" target="_blank" rel="noopener noreferrer">China voices ‘extreme disappointment’ with Dutch minister at centre of car chip row</a></td></tr>
+<tr><td>2025-11-13</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/technology/2025/nov/13/uk-firms-can-win-significant-chunk-ai-chip-market" target="_blank" rel="noopener noreferrer">UK firms can win a significant chunk of the AI chip market | John Browne</a></td></tr>
+<tr><td>2025-11-11</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/live/2025/nov/11/pound-falls-uk-unemployment-four-year-high-stock-markets-ftse-100-business-live-news" target="_blank" rel="noopener noreferrer">Tech shares slide after SoftBank sells Nvidia stake; UK interest rate cut expected in December – as it happened</a></td></tr>
+<tr><td>2025-11-11</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/2025/nov/11/nexperia-row-china-trade-brussels-beijing-chips" target="_blank" rel="noopener noreferrer">Nexperia row shows how China is weaponising EU relationship - and winning</a></td></tr>
+<tr><td>2025-11-05</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/live/2025/nov/05/china-ends-tariffs-us-imports-soy-bean-levies-ms-profits-cyber-attack-business-live" target="_blank" rel="noopener noreferrer">European markets down and Asian chipmakers tumble in global stock sell-off amid worries over AI bubble – as it happened</a></td></tr>
+<tr><td>2025-11-04</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/2025/nov/04/china-netherlands-chip-war-car-factories-nexperia" target="_blank" rel="noopener noreferrer">China accuses Dutch of prolonging chip war that threatens to halt car factories</a></td></tr>
+                </tbody>
+            </table>
+        </section>
 
         <div class="footer">
             <p>
