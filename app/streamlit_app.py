@@ -238,6 +238,40 @@ def render_pipeline_summary(summary: dict) -> None:
         st.json(metric_summary)
 
 
+def render_news_articles(response: dict) -> None:
+    """
+    Render a compact table of recently ingested news articles.
+    """
+    st.subheader("Recent Ingested Articles")
+
+    articles = response.get("articles", [])
+    if not articles:
+        st.info("No news articles found yet. Run the pipeline first.")
+        return
+
+    articles_df = pd.DataFrame(articles)
+    visible_columns = [
+        col
+        for col in ["published_at", "provider", "source", "title", "url", "language"]
+        if col in articles_df.columns
+    ]
+    articles_df = articles_df[visible_columns]
+
+    st.dataframe(
+        articles_df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "published_at": st.column_config.TextColumn("Published"),
+            "provider": st.column_config.TextColumn("Provider"),
+            "source": st.column_config.TextColumn("Source"),
+            "title": st.column_config.TextColumn("Title", width="large"),
+            "url": st.column_config.LinkColumn("Article"),
+            "language": st.column_config.TextColumn("Lang"),
+        },
+    )
+
+
 # Main page title and short description.
 st.title("Electronics Price Pressure Dashboard")
 st.write("Interactive dashboard for the electronics price pressure pipeline and API.")
@@ -298,3 +332,10 @@ with right_col:
 if "pipeline_result" in st.session_state:
     st.divider()
     render_pipeline_summary(st.session_state["pipeline_result"])
+
+st.divider()
+try:
+    articles_response = fetch_json("/news-articles?limit=50&cleaned=true")
+    render_news_articles(articles_response)
+except Exception as exc:
+    st.warning(f"Could not load ingested articles: {exc}")

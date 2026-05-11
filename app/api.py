@@ -20,13 +20,14 @@ import json
 from pathlib import Path
 
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 
 from src.feature_engineering import build_feature_table
 from src.ingest_fred import ingest_fred
 from src.ingest_news import ingest_news
 from src.predict import predict_latest
 from src.preprocess import preprocess_news
+from src.storage import load_dataframe_from_mongo
 from src.train import train_model
 from src.utils import ensure_directories, get_log_level, load_config, setup_env, setup_logging
 from src.generate_pages_report import generate_pages_report
@@ -171,6 +172,81 @@ def get_metrics() -> dict:
     return {
         "status": "success",
         "metrics": metrics,
+    }
+
+
+@app.get("/news-articles")
+def get_news_articles(
+    limit: int = Query(default=50, ge=1, le=500),
+    cleaned: bool = Query(default=True),
+) -> dict:
+    """
+    Return recent ingested news articles.
+
+    Why this endpoint exists:
+    - The news articles are a core input to the feature pipeline.
+    - Exposing a compact article list makes ingestion easier to inspect
+      without connecting directly to MongoDB.
+
+    Parameters
+    ----------
+    limit : int
+        Maximum number of articles to return.
+    cleaned : bool
+        If True, read from the cleaned news collection. Otherwise read raw news.
+
+    Returns
+    -------
+    dict
+        JSON response containing recent article metadata.
+    """
+    config = _prepare_environment()
+    mongo_cfg = config["storage"]["mongo"]
+    collection_name = (
+        mongo_cfg["clean_news_collection"]
+        if cleaned
+        else mongo_cfg["raw_news_collection"]
+    )
+
+    sort_by = "published_at" if cleaned else "seen_date"
+    df = load_dataframe_from_mongo(config, collection_name, sort_by=sort_by)
+
+    if df.empty:
+        return {
+            "status": "success",
+            "collection": collection_name,
+            "count": 0,
+            "articles": [],
+        }
+
+    preferred_columns = [
+        "provider",
+        "published_at",
+        "seen_date",
+        "month",
+        "title",
+        "url",
+        "source",
+        "language",
+        "source_country",
+        "clean_text",
+    ]
+    columns = [col for col in preferred_columns if col in df.columns]
+    article_df = df[columns].tail(limit).iloc[::-1].copy()
+
+    for date_col in ["published_at", "seen_date", "month"]:
+        if date_col in article_df.columns:
+            article_df[date_col] = pd.to_datetime(article_df[date_col], errors="coerce")
+            article_df[date_col] = article_df[date_col].dt.strftime("%Y-%m-%d")
+            article_df[date_col] = article_df[date_col].fillna("")
+
+    article_df = article_df.fillna("")
+
+    return {
+        "status": "success",
+        "collection": collection_name,
+        "count": int(len(article_df)),
+        "articles": article_df.to_dict(orient="records"),
     }
 
 

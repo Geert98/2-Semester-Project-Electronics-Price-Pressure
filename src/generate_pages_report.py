@@ -15,10 +15,12 @@ from __future__ import annotations
 # public frontend without requiring a live Python backend.
 
 import json
+from html import escape
 from pathlib import Path
 
 import pandas as pd
 
+from src.storage import load_dataframe_from_mongo
 from src.utils import ensure_directories, load_config
 
 
@@ -87,6 +89,60 @@ def _confusion_matrix_html(confusion: list[list[int]]) -> str:
     """
 
 
+def _load_recent_articles(config: dict, limit: int = 20) -> list[dict]:
+    """Load a compact recent-articles sample from MongoDB."""
+    try:
+        collection = config["storage"]["mongo"]["clean_news_collection"]
+        df = load_dataframe_from_mongo(config, collection, sort_by="published_at")
+    except Exception:
+        return []
+
+    if df.empty:
+        return []
+
+    columns = [
+        col
+        for col in ["published_at", "provider", "source", "title", "url", "language"]
+        if col in df.columns
+    ]
+    article_df = df[columns].tail(limit).iloc[::-1].copy()
+
+    if "published_at" in article_df.columns:
+        article_df["published_at"] = pd.to_datetime(
+            article_df["published_at"],
+            errors="coerce",
+        ).dt.strftime("%Y-%m-%d")
+
+    article_df = article_df.fillna("")
+    return article_df.to_dict(orient="records")
+
+
+def _articles_to_html_rows(articles: list[dict]) -> str:
+    """Render recent articles as HTML table rows."""
+    if not articles:
+        return "<tr><td colspan='5'>No ingested articles available.</td></tr>"
+
+    rows = []
+    for article in articles:
+        published = escape(str(article.get("published_at", "")))
+        provider = escape(str(article.get("provider", "")))
+        source = escape(str(article.get("source", "")))
+        title = escape(str(article.get("title", "")))
+        url = escape(str(article.get("url", "")))
+
+        link = f"<a href=\"{url}\" target=\"_blank\" rel=\"noopener noreferrer\">{title}</a>" if url else title
+        rows.append(
+            "<tr>"
+            f"<td>{published}</td>"
+            f"<td>{provider}</td>"
+            f"<td>{source}</td>"
+            f"<td>{link}</td>"
+            "</tr>"
+        )
+
+    return "\n".join(rows)
+
+
 def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
     """
     Generate a static HTML dashboard from saved pipeline artifacts.
@@ -122,6 +178,7 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
     html_path = docs_dir / "index.html"
     prediction_json_path = docs_dir / "latest_prediction.json"
     metrics_json_path = docs_dir / "train_metrics.json"
+    articles_json_path = docs_dir / "news_articles.json"
 
     # Load latest prediction artifact if it exists.
     prediction = {}
@@ -136,6 +193,8 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
         with open(metrics_path, "r", encoding="utf-8") as f:
             metrics = json.load(f)
 
+    recent_articles = _load_recent_articles(config, limit=20)
+
     # Save copies of the key artifacts into docs/ as well.
     # This is useful for transparency and possible future frontend extensions.
     with open(prediction_json_path, "w", encoding="utf-8") as f:
@@ -143,6 +202,9 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
 
     with open(metrics_json_path, "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
+
+    with open(articles_json_path, "w", encoding="utf-8") as f:
+        json.dump(recent_articles, f, indent=2)
 
     # Extract prediction fields.
     pred_month = prediction.get("month", "N/A")
@@ -162,6 +224,7 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
     pred_dist_html = _dict_to_html_rows(metrics.get("predicted_class_distribution", {}))
 
     confusion_html = _confusion_matrix_html(metrics.get("confusion_matrix", []))
+    articles_html = _articles_to_html_rows(recent_articles)
 
     # Create the static HTML page.
     html = f"""<!DOCTYPE html>
@@ -345,6 +408,19 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
             font-weight: 600;
         }}
 
+        a {{
+            color: #93c5fd;
+            text-decoration: none;
+        }}
+
+        a:hover {{
+            text-decoration: underline;
+        }}
+
+        .wide-panel {{
+            margin-top: 24px;
+        }}
+
         .matrix-table th,
         .matrix-table td {{
             text-align: center;
@@ -487,6 +563,23 @@ def generate_pages_report(config_path: str = "configs/config.yaml") -> Path:
                 {confusion_html}
             </section>
         </div>
+
+        <section class="panel wide-panel">
+            <h2>Recent Ingested Articles</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Published</th>
+                        <th>Provider</th>
+                        <th>Source</th>
+                        <th>Article</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {articles_html}
+                </tbody>
+            </table>
+        </section>
 
         <div class="footer">
             <p>
