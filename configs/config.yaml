@@ -23,15 +23,27 @@ storage:
     fred_db_path: data/db/fred.sqlite3
 
 news:
-  use_gdelt: true
-  start_date: "2023-01-01"
+  use_gdelt: false
+  use_guardian: true
+  use_newsdata: false
+  start_date: "2024-01-01"
   end_date: "2026-03-31"
-  query: '(semiconductor OR memory OR NAND OR DRAM OR SSD OR RAM)'
+  query: '((semiconductor OR DRAM OR NAND OR SSD) AND (price OR shortage OR tariff OR supply))'
   max_records_per_window: 25
   window: monthly
-  sleep_seconds: 5
+  sleep_seconds: 1.2
   max_retries: 3
   retry_base_sleep: 3
+  guardian:
+    api_key_env: GUARDIAN_API_KEY
+    order_by: newest
+    show_fields: trailText,thumbnail
+    min_request_interval_seconds: 1.2
+  newsdata:
+    api_key_env: NEWSDATA_API_KEY
+    endpoint: archive
+    language: en
+    min_request_interval_seconds: 31
 
 features:
   keywords:

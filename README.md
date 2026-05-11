@@ -119,7 +119,7 @@ Automation
 
 The full pipeline performs the following steps:
 1.	Download the FRED producer price index series and persist it in SQLite
-2.	Download monthly news data from GDELT and persist it in MongoDB
+2.	Download monthly news data from The Guardian Open Platform or GDELT and persist it in MongoDB
 3.	Clean and preprocess the news articles in MongoDB
 4.	Aggregate article-level data to monthly features
 5.	Build lagged and rolling structured features from SQLite-backed FRED data
@@ -156,7 +156,17 @@ conda activate DataScience
 pip install -r requirements.txt
 ```
 
-#### 4. Run the full pipeline
+#### 4. Configure news API keys
+The default news providers are The Guardian Open Platform and NewsData.io. Add your API keys to the environment or to a local `.env` file:
+
+```bash
+GUARDIAN_API_KEY=your_guardian_open_platform_key
+NEWSDATA_API_KEY=your_newsdata_key
+```
+
+The Guardian developer tier allows 1 call per second and 500 calls per day, so `configs/config.yaml` spaces Guardian requests by 1.2 seconds. NewsData.io free users are limited to 30 credits per 15 minutes, so NewsData requests are spaced by 31 seconds by default to avoid HTTP 429 rate-limit responses.
+
+#### 5. Run the full pipeline
 ```bash
 python run_pipeline.py
 ```
@@ -164,7 +174,7 @@ python run_pipeline.py
 This will:
 ingest data --> preprocess data --> engineer features --> train the model --> generate the latest prediction --> generate the static report
 
-#### 5. Open FastAPI locally
+#### 6. Open FastAPI locally
 ```bash
 uvicorn app.api:app --reload
 ```
@@ -174,7 +184,7 @@ uvicorn app.api:app --reload
 http://127.0.0.1:8000/docs
 ```
 
-#### 6. Run Streamlit
+#### 7. Run Streamlit
 ```bash
 streamlit run app/streamlit_app.py
 ```
@@ -232,5 +242,3 @@ This workflow is used for:
 ### Author
 
 Made by Anders Geert: **[Github profile](https://github.com/Geert98)**
-
-
