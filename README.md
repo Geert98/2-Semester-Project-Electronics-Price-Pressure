@@ -119,7 +119,7 @@ Automation
 
 The full pipeline performs the following steps:
 1.	Download the FRED producer price index series, WTI oil prices, and the New York Fed Global Supply Chain Pressure Index, then persist them in SQLite
-2.	Download monthly news data from The Guardian Open Platform or GDELT and persist it in MongoDB
+2.	Download historical Guardian news data and recent NewsAPI.org articles, then persist them in MongoDB
 3.	Clean and preprocess the news articles in MongoDB
 4.	Aggregate article-level data to monthly features
 5.	Build lagged and rolling structured features from SQLite-backed FRED data
@@ -157,14 +157,15 @@ pip install -r requirements.txt
 ```
 
 #### 4. Configure news API keys
-The default news providers are The Guardian Open Platform and GDELT. NewsData.io is configured as an optional provider, but it is disabled by default because historical archive access depends on the account plan. Add your API keys to the environment or to a local `.env` file:
+The default news providers are The Guardian Open Platform for historical backfill and NewsAPI.org for recent articles. GDELT and NewsData.io are configured as optional providers, but they are disabled by default: GDELT can be rate-limited during historical backfills, and NewsData historical archive access depends on the account plan. Add your API keys to the environment or to a local `.env` file:
 
 ```bash
 GUARDIAN_API_KEY=your_guardian_open_platform_key
+NEWSAPI_KEY=your_newsapi_org_key
 NEWSDATA_API_KEY=your_newsdata_key
 ```
 
-The Guardian developer tier allows 1 call per second and 500 calls per day, so `configs/config.yaml` spaces Guardian requests by 1.2 seconds. GDELT requests are spaced more conservatively because the pipeline queries one monthly window at a time. NewsData.io free users are limited to 30 credits per 15 minutes, so NewsData requests are spaced by 31 seconds if that provider is enabled later.
+The Guardian developer tier allows 1 call per second and 500 calls per day, so `configs/config.yaml` spaces Guardian requests by 1.2 seconds. The pipeline can request multiple Guardian pages per monthly window to increase article coverage while staying below that daily call limit. NewsAPI.org's free developer plan can search articles up to one month old with 100 requests per day, so this project uses it only as a recent-news source. NewsData.io free users are limited to 30 credits per 15 minutes, so NewsData requests are spaced by 31 seconds if that provider is enabled later.
 
 #### 5. Optional: use UCloud MongoDB
 For a production-like setup, point the pipeline at an external MongoDB instance instead of the local Docker database:

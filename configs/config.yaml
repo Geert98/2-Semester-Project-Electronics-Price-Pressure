@@ -29,8 +29,9 @@ storage:
     fred_db_path: data/db/fred.sqlite3
 
 news:
-  use_gdelt: true
+  use_gdelt: false
   use_guardian: true
+  use_newsapi: true
   use_newsdata: false
   start_date: "2023-01-01"
   end_date: "2026-03-31"
@@ -45,6 +46,15 @@ news:
     order_by: newest
     show_fields: trailText,thumbnail
     min_request_interval_seconds: 1.2
+    max_pages_per_window: 3
+  newsapi:
+    api_key_env: NEWSAPI_KEY
+    endpoint: everything
+    lookback_days: 30
+    language: en
+    sort_by: publishedAt
+    min_request_interval_seconds: 1.2
+    max_pages: 1
   newsdata:
     api_key_env: NEWSDATA_API_KEY
     endpoint: archive

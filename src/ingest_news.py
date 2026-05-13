@@ -8,7 +8,7 @@ from __future__ import annotations
 # The script:
 # 1. reads the news ingestion settings from the shared config file
 # 2. creates monthly time windows for the requested period
-# 3. queries the configured news API for each month
+# 3. queries the configured historical and recent news APIs
 # 4. retries failed requests with exponential backoff
 # 5. stores the raw article-level results in MongoDB
 #
@@ -33,6 +33,9 @@ GDELT_URL = "https://api.gdeltproject.org/api/v2/doc/doc"
 
 # Base endpoint for The Guardian Open Platform Content API.
 GUARDIAN_URL = "https://content.guardianapis.com/search"
+
+# Base endpoint for NewsAPI.org.
+NEWSAPI_URL = "https://newsapi.org/v2/everything"
 
 # Base endpoint for the NewsData.io API.
 NEWSDATA_BASE_URL = "https://newsdata.io/api/1"
@@ -290,6 +293,25 @@ def _fetch_newsdata_with_retry(
     )
 
 
+def _fetch_newsapi_with_retry(
+    params: dict,
+    max_retries: int = 5,
+    base_sleep: float = 5.0,
+    throttler: RequestThrottler | None = None,
+) -> dict:
+    """
+    Query NewsAPI.org with retry logic and request throttling.
+    """
+    return _fetch_json_with_retry(
+        url=NEWSAPI_URL,
+        params=params,
+        provider_name="NewsAPI",
+        max_retries=max_retries,
+        base_sleep=base_sleep,
+        before_request=throttler.wait if throttler else None,
+    )
+
+
 def _api_key_from_env(news_cfg: dict, provider: str, default_env: str) -> str:
     """
     Read a provider API key from the environment.
@@ -318,6 +340,13 @@ def _newsdata_api_key(news_cfg: dict) -> str:
     Read the NewsData.io API key from the environment.
     """
     return _api_key_from_env(news_cfg, "newsdata", "NEWSDATA_API_KEY")
+
+
+def _newsapi_api_key(news_cfg: dict) -> str:
+    """
+    Read the NewsAPI.org API key from the environment.
+    """
+    return _api_key_from_env(news_cfg, "newsapi", "NEWSAPI_KEY")
 
 
 def _append_gdelt_rows(
@@ -404,6 +433,7 @@ def _append_guardian_rows(
     guardian_cfg = news_cfg.get("guardian", {})
     api_key = _guardian_api_key(news_cfg)
     min_interval = float(guardian_cfg.get("min_request_interval_seconds", 1.2))
+    max_pages = max(1, int(guardian_cfg.get("max_pages_per_window", 1)))
     page_size = min(max_records, 50)
     throttler = RequestThrottler(min_interval)
 
@@ -425,52 +455,72 @@ def _append_guardian_rows(
             window_end.date(),
         )
 
-        params = {
-            "api-key": api_key,
-            "q": query,
-            "from-date": _to_guardian_date(window_start),
-            "to-date": _to_guardian_date(window_end),
-            "page": 1,
-            "page-size": page_size,
-            "order-by": guardian_cfg.get("order_by", "newest"),
-            "show-fields": guardian_cfg.get("show_fields", "trailText,thumbnail"),
-        }
+        page = 1
+        total_pages = max_pages
+        fetched_for_window = 0
 
-        try:
-            payload = _fetch_guardian_with_retry(
-                params=params,
-                max_retries=max_retries,
-                base_sleep=retry_base_sleep,
-                throttler=throttler,
-            )
-        except Exception as exc:
-            logger.warning(
-                "Skipping Guardian window %s due to repeated failure: %s",
-                window_start.date(),
-                exc,
-            )
-            continue
+        while page <= max_pages and page <= total_pages:
+            params = {
+                "api-key": api_key,
+                "q": query,
+                "from-date": _to_guardian_date(window_start),
+                "to-date": _to_guardian_date(window_end),
+                "page": page,
+                "page-size": page_size,
+                "order-by": guardian_cfg.get("order_by", "newest"),
+                "show-fields": guardian_cfg.get("show_fields", "trailText,thumbnail"),
+            }
 
-        response = payload.get("response", {})
-        articles = response.get("results", [])
-        logger.info("Fetched %s Guardian articles", len(articles))
+            try:
+                payload = _fetch_guardian_with_retry(
+                    params=params,
+                    max_retries=max_retries,
+                    base_sleep=retry_base_sleep,
+                    throttler=throttler,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Stopping Guardian window %s at page %s due to repeated failure: %s",
+                    window_start.date(),
+                    page,
+                    exc,
+                )
+                break
 
-        for article in articles:
-            fields = article.get("fields", {})
-            rows.append(
-                {
-                    "provider": "guardian",
-                    "window_start": window_start.date().isoformat(),
-                    "window_end": window_end.date().isoformat(),
-                    "title": article.get("webTitle"),
-                    "url": article.get("webUrl"),
-                    "source": "The Guardian",
-                    "language": "en",
-                    "seen_date": article.get("webPublicationDate"),
-                    "social_image": fields.get("thumbnail"),
-                    "source_country": "",
-                }
+            response = payload.get("response", {})
+            articles = response.get("results", [])
+            total_pages = min(int(response.get("pages", 1)), max_pages)
+            logger.info(
+                "Fetched %s Guardian articles from page %s/%s",
+                len(articles),
+                page,
+                total_pages,
             )
+
+            if not articles:
+                break
+
+            for article in articles:
+                fields = article.get("fields", {})
+                rows.append(
+                    {
+                        "provider": "guardian",
+                        "window_start": window_start.date().isoformat(),
+                        "window_end": window_end.date().isoformat(),
+                        "title": article.get("webTitle"),
+                        "url": article.get("webUrl"),
+                        "source": "The Guardian",
+                        "language": "en",
+                        "seen_date": article.get("webPublicationDate"),
+                        "social_image": fields.get("thumbnail"),
+                        "source_country": "",
+                    }
+                )
+
+            fetched_for_window += len(articles)
+            page += 1
+
+        logger.info("Fetched %s Guardian articles for window", fetched_for_window)
 
 
 def _append_newsdata_rows(
@@ -566,6 +616,112 @@ def _append_newsdata_rows(
             )
 
 
+def _append_newsapi_rows(
+    rows: list[dict],
+    news_cfg: dict,
+    query: str,
+    max_records: int,
+    max_retries: int,
+    retry_base_sleep: float,
+) -> None:
+    """
+    Fetch recent NewsAPI.org rows into the shared raw news schema.
+
+    NewsAPI.org's free developer plan can search articles up to one month old,
+    so this provider is intentionally recent-only rather than part of the
+    historical monthly backfill loop.
+    """
+    newsapi_cfg = news_cfg.get("newsapi", {})
+    api_key = _newsapi_api_key(news_cfg)
+    lookback_days = max(1, int(newsapi_cfg.get("lookback_days", 30)))
+    language = newsapi_cfg.get("language", "en")
+    sort_by = newsapi_cfg.get("sort_by", "publishedAt")
+    min_interval = float(newsapi_cfg.get("min_request_interval_seconds", 1.2))
+    max_pages = max(1, int(newsapi_cfg.get("max_pages", 1)))
+    page_size = min(max_records, 100)
+    throttler = RequestThrottler(min_interval)
+
+    window_end = pd.Timestamp.now(tz="UTC").normalize()
+    window_start = window_end - pd.Timedelta(days=lookback_days)
+
+    logger.info(
+        "Starting NewsAPI ingestion from %s to %s",
+        window_start.date(),
+        window_end.date(),
+    )
+
+    page = 1
+    total_results = page_size * max_pages
+    fetched_total = 0
+
+    while page <= max_pages and (page - 1) * page_size < total_results:
+        params = {
+            "apiKey": api_key,
+            "q": query,
+            "from": window_start.strftime("%Y-%m-%d"),
+            "to": window_end.strftime("%Y-%m-%d"),
+            "language": language,
+            "sortBy": sort_by,
+            "pageSize": page_size,
+            "page": page,
+        }
+
+        try:
+            payload = _fetch_newsapi_with_retry(
+                params=params,
+                max_retries=max_retries,
+                base_sleep=retry_base_sleep,
+                throttler=throttler,
+            )
+        except Exception as exc:
+            logger.warning(
+                "Stopping NewsAPI ingestion at page %s due to repeated failure: %s",
+                page,
+                exc,
+            )
+            break
+
+        if payload.get("status") == "error":
+            logger.warning(
+                "Stopping NewsAPI ingestion because API returned error: %s",
+                payload.get("message", payload),
+            )
+            break
+
+        articles = payload.get("articles", [])
+        total_results = int(payload.get("totalResults", 0))
+        logger.info(
+            "Fetched %s NewsAPI articles from page %s",
+            len(articles),
+            page,
+        )
+
+        if not articles:
+            break
+
+        for article in articles:
+            source = article.get("source") or {}
+            rows.append(
+                {
+                    "provider": "newsapi",
+                    "window_start": window_start.date().isoformat(),
+                    "window_end": window_end.date().isoformat(),
+                    "title": article.get("title"),
+                    "url": article.get("url"),
+                    "source": source.get("name") or source.get("id"),
+                    "language": language,
+                    "seen_date": article.get("publishedAt"),
+                    "social_image": article.get("urlToImage"),
+                    "source_country": "",
+                }
+            )
+
+        fetched_total += len(articles)
+        page += 1
+
+    logger.info("Fetched %s NewsAPI articles total", fetched_total)
+
+
 def ingest_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     """
     Download monthly news article lists from configured APIs and save them.
@@ -606,12 +762,13 @@ def ingest_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
 
     use_gdelt = bool(news_cfg.get("use_gdelt", True))
     use_guardian = bool(news_cfg.get("use_guardian", False))
+    use_newsapi = bool(news_cfg.get("use_newsapi", False))
     use_newsdata = bool(news_cfg.get("use_newsdata", False))
 
-    if not use_gdelt and not use_guardian and not use_newsdata:
+    if not use_gdelt and not use_guardian and not use_newsapi and not use_newsdata:
         raise ValueError(
             "At least one news provider must be enabled: "
-            "use_gdelt, use_guardian, or use_newsdata."
+            "use_gdelt, use_guardian, use_newsapi, or use_newsdata."
         )
 
     # This list will collect one dictionary per article across all providers.
@@ -635,6 +792,16 @@ def ingest_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
             query=query,
             max_records=max_records,
             windows=windows,
+            max_retries=max_retries,
+            retry_base_sleep=retry_base_sleep,
+        )
+
+    if use_newsapi:
+        _append_newsapi_rows(
+            rows=rows,
+            news_cfg=news_cfg,
+            query=query,
+            max_records=max_records,
             max_retries=max_retries,
             retry_base_sleep=retry_base_sleep,
         )

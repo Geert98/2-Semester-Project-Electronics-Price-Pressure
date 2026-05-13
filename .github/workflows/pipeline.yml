@@ -50,6 +50,7 @@ jobs:
       - name: Run full pipeline
         env:
           GUARDIAN_API_KEY: ${{ secrets.GUARDIAN_API_KEY }}
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
           NEWSDATA_API_KEY: ${{ secrets.NEWSDATA_API_KEY }}
           MONGO_URI: ${{ secrets.MONGO_URI }}
           MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
