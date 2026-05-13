@@ -3,7 +3,7 @@
 An end-to-end MLOps-style pipeline for monitoring and predicting short-term **electronics price pressure** using:
 
 - structured market indicator data from **FRED** stored in **SQLite**
-- unstructured news data from **GDELT** stored in **MongoDB**
+- unstructured news data from **The Guardian Open Platform** stored in **MongoDB**
 - feature engineering across both sources
 - a baseline classification model
 - automated artifact generation
@@ -124,13 +124,13 @@ The full pipeline performs the following steps:
 4.	Aggregate article-level data to monthly features
 5.	Build lagged and rolling structured features from SQLite-backed FRED data
 6.	Construct the next-period target class
-7.	Train a baseline Logistic Regression model
-8.	Evaluate the model on a time-based holdout test set
+7.	Train and compare Logistic Regression and Gradient Boosting classifiers
+8.	Evaluate models on a time-based holdout test set and save the best model
 9.	Generate the latest prediction artifact
 10.	Generate a static HTML report for GitHub Pages
 
 ---
-MongoDB is required for the news pipeline, and the recommended way to run the stack locally is via Docker Compose.
+MongoDB is required for the news pipeline. The default local setup uses Docker Compose, while a production-like setup can point `MONGO_URI` to an external MongoDB service such as UCloud.
 ---
 
 ## Build, Run, and Reproduce
@@ -166,7 +166,17 @@ NEWSDATA_API_KEY=your_newsdata_key
 
 The Guardian developer tier allows 1 call per second and 500 calls per day, so `configs/config.yaml` spaces Guardian requests by 1.2 seconds. NewsData.io free users are limited to 30 credits per 15 minutes, so NewsData requests are spaced by 31 seconds by default to avoid HTTP 429 rate-limit responses.
 
-#### 5. Run the full pipeline
+#### 5. Optional: use UCloud MongoDB
+For a production-like setup, point the pipeline at an external MongoDB instance instead of the local Docker database:
+
+```bash
+MONGO_URI=mongodb://username:password@host:port/?authSource=admin
+MONGO_DB_NAME=electronics_price_pressure
+```
+
+Keep these values in `.env` locally and in GitHub Actions repository secrets. Do not commit database credentials.
+
+#### 6. Run the full pipeline
 ```bash
 python run_pipeline.py
 ```
@@ -174,7 +184,7 @@ python run_pipeline.py
 This will:
 ingest data --> preprocess data --> engineer features --> train the model --> generate the latest prediction --> generate the static report
 
-#### 6. Open FastAPI locally
+#### 7. Open FastAPI locally
 ```bash
 uvicorn app.api:app --reload
 ```
@@ -184,7 +194,7 @@ uvicorn app.api:app --reload
 http://127.0.0.1:8000/docs
 ```
 
-#### 7. Run Streamlit
+#### 8. Run Streamlit
 ```bash
 streamlit run app/streamlit_app.py
 ```
@@ -236,6 +246,14 @@ This workflow is used for:
 - updating artifacts
 - regenerate the static dashboard
 - publish the result on Github Pages
+
+For UCloud MongoDB, add these repository secrets before running the workflow:
+
+```text
+MONGO_URI
+MONGO_DB_NAME
+GUARDIAN_API_KEY
+```
 
 ---
 

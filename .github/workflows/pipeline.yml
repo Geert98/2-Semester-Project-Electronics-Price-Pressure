@@ -51,6 +51,8 @@ jobs:
         env:
           GUARDIAN_API_KEY: ${{ secrets.GUARDIAN_API_KEY }}
           NEWSDATA_API_KEY: ${{ secrets.NEWSDATA_API_KEY }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
         run: |
           python run_pipeline.py
 

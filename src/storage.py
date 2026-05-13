@@ -16,8 +16,10 @@ def _get_storage_config(config: dict[str, Any]) -> dict[str, Any]:
 
 def get_mongo_settings(config: dict[str, Any]) -> tuple[str, str]:
     storage_cfg = _get_storage_config(config).get("mongo", {})
-    uri = os.getenv("MONGO_URI", storage_cfg.get("uri", "mongodb://localhost:27017"))
-    db_name = os.getenv("MONGO_DB_NAME", storage_cfg.get("database", "electronics_price_pressure"))
+    default_uri = storage_cfg.get("uri", "mongodb://localhost:27017")
+    default_db_name = storage_cfg.get("database", "electronics_price_pressure")
+    uri = os.getenv("MONGO_URI") or default_uri
+    db_name = os.getenv("MONGO_DB_NAME") or default_db_name
     return uri, db_name
 
 
