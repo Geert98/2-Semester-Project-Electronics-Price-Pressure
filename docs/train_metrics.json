@@ -5,8 +5,8 @@
   "n_rows_train": 326,
   "n_rows_test": 12,
   "feature_count": 30,
-  "accuracy": 0.4166666666666667,
-  "macro_f1": 0.3111111111111111,
+  "accuracy": 0.25,
+  "macro_f1": 0.2611111111111111,
   "train_class_distribution": {
     "low": 121,
     "medium": 110,
@@ -18,9 +18,9 @@
     "low": 1
   },
   "predicted_class_distribution": {
-    "high": 7,
-    "low": 3,
-    "medium": 2
+    "low": 7,
+    "medium": 3,
+    "high": 2
   },
   "labels_in_test": [
     "high",
@@ -29,68 +29,69 @@
   ],
   "classification_report": {
     "low": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
+      "precision": 0.14285714285714285,
+      "recall": 1.0,
+      "f1-score": 0.25,
       "support": 1.0
     },
     "medium": {
-      "precision": 0.5,
+      "precision": 0.3333333333333333,
       "recall": 0.3333333333333333,
-      "f1-score": 0.4,
+      "f1-score": 0.3333333333333333,
       "support": 3.0
     },
     "high": {
-      "precision": 0.5714285714285714,
-      "recall": 0.5,
-      "f1-score": 0.5333333333333333,
+      "precision": 0.5,
+      "recall": 0.125,
+      "f1-score": 0.2,
       "support": 8.0
     },
-    "accuracy": 0.4166666666666667,
+    "accuracy": 0.25,
     "macro avg": {
-      "precision": 0.35714285714285715,
-      "recall": 0.27777777777777773,
-      "f1-score": 0.3111111111111111,
+      "precision": 0.3253968253968254,
+      "recall": 0.4861111111111111,
+      "f1-score": 0.26111111111111107,
       "support": 12.0
     },
     "weighted avg": {
-      "precision": 0.5059523809523809,
-      "recall": 0.4166666666666667,
-      "f1-score": 0.45555555555555555,
+      "precision": 0.42857142857142855,
+      "recall": 0.25,
+      "f1-score": 0.23750000000000002,
       "support": 12.0
     }
   },
   "confusion_matrix": [
     [
+      1,
       0,
-      0,
+      0
+    ],
+    [
+      1,
+      1,
       1
     ],
     [
-      0,
-      1,
-      2
-    ],
-    [
-      3,
-      1,
-      4
+      5,
+      2,
+      1
     ]
   ],
   "model_results": {
     "logistic_regression": {
       "model_name": "logistic_regression",
-      "accuracy": 0.5833333333333334,
-      "macro_f1": 0.24561403508771928,
+      "accuracy": 0.25,
+      "macro_f1": 0.21666666666666667,
       "predicted_class_distribution": {
-        "high": 11,
-        "low": 1
+        "low": 7,
+        "medium": 3,
+        "high": 2
       },
       "classification_report": {
         "low": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1-score": 0.0,
+          "precision": 0.14285714285714285,
+          "recall": 1.0,
+          "f1-score": 0.25,
           "support": 1.0
         },
         "medium": {
@@ -100,100 +101,100 @@
           "support": 3.0
         },
         "high": {
-          "precision": 0.6363636363636364,
-          "recall": 0.875,
-          "f1-score": 0.7368421052631579,
+          "precision": 1.0,
+          "recall": 0.25,
+          "f1-score": 0.4,
           "support": 8.0
         },
-        "accuracy": 0.5833333333333334,
+        "accuracy": 0.25,
         "macro avg": {
-          "precision": 0.21212121212121213,
-          "recall": 0.2916666666666667,
-          "f1-score": 0.24561403508771928,
+          "precision": 0.38095238095238093,
+          "recall": 0.4166666666666667,
+          "f1-score": 0.21666666666666667,
           "support": 12.0
         },
         "weighted avg": {
-          "precision": 0.42424242424242425,
-          "recall": 0.5833333333333334,
-          "f1-score": 0.49122807017543857,
+          "precision": 0.6785714285714285,
+          "recall": 0.25,
+          "f1-score": 0.28750000000000003,
           "support": 12.0
         }
       },
       "confusion_matrix": [
         [
-          0,
-          0,
-          1
-        ],
-        [
-          0,
-          0,
-          3
-        ],
-        [
           1,
           0,
-          7
+          0
+        ],
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          3,
+          3,
+          2
         ]
       ]
     },
     "gradient_boosting": {
       "model_name": "gradient_boosting",
-      "accuracy": 0.4166666666666667,
-      "macro_f1": 0.3111111111111111,
+      "accuracy": 0.25,
+      "macro_f1": 0.2611111111111111,
       "predicted_class_distribution": {
-        "high": 7,
-        "low": 3,
-        "medium": 2
+        "low": 7,
+        "medium": 3,
+        "high": 2
       },
       "classification_report": {
         "low": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1-score": 0.0,
+          "precision": 0.14285714285714285,
+          "recall": 1.0,
+          "f1-score": 0.25,
           "support": 1.0
         },
         "medium": {
-          "precision": 0.5,
+          "precision": 0.3333333333333333,
           "recall": 0.3333333333333333,
-          "f1-score": 0.4,
+          "f1-score": 0.3333333333333333,
           "support": 3.0
         },
         "high": {
-          "precision": 0.5714285714285714,
-          "recall": 0.5,
-          "f1-score": 0.5333333333333333,
+          "precision": 0.5,
+          "recall": 0.125,
+          "f1-score": 0.2,
           "support": 8.0
         },
-        "accuracy": 0.4166666666666667,
+        "accuracy": 0.25,
         "macro avg": {
-          "precision": 0.35714285714285715,
-          "recall": 0.27777777777777773,
-          "f1-score": 0.3111111111111111,
+          "precision": 0.3253968253968254,
+          "recall": 0.4861111111111111,
+          "f1-score": 0.26111111111111107,
           "support": 12.0
         },
         "weighted avg": {
-          "precision": 0.5059523809523809,
-          "recall": 0.4166666666666667,
-          "f1-score": 0.45555555555555555,
+          "precision": 0.42857142857142855,
+          "recall": 0.25,
+          "f1-score": 0.23750000000000002,
           "support": 12.0
         }
       },
       "confusion_matrix": [
         [
+          1,
           0,
-          0,
+          0
+        ],
+        [
+          1,
+          1,
           1
         ],
         [
-          0,
-          1,
-          2
-        ],
-        [
-          3,
-          1,
-          4
+          5,
+          2,
+          1
         ]
       ]
     }
