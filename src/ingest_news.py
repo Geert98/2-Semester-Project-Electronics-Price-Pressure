@@ -73,6 +73,16 @@ def _to_guardian_date(dt: pd.Timestamp) -> str:
     return dt.strftime("%Y-%m-%d")
 
 
+def _resolve_config_date(value: str) -> str:
+    """
+    Resolve static or dynamic date values from config.
+    """
+    normalized = str(value).strip().lower()
+    if normalized in {"today", "now", "current_date"}:
+        return pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d")
+    return str(value)
+
+
 def _month_windows(start_date: str, end_date: str) -> list[tuple[pd.Timestamp, pd.Timestamp]]:
     """
     Generate monthly start/end windows between two dates.
@@ -94,8 +104,8 @@ def _month_windows(start_date: str, end_date: str) -> list[tuple[pd.Timestamp, p
     list[tuple[pd.Timestamp, pd.Timestamp]]
         List of monthly (start, end) tuples.
     """
-    start = pd.to_datetime(start_date).to_period("M").to_timestamp()
-    end = pd.to_datetime(end_date).to_period("M").to_timestamp()
+    start = pd.to_datetime(_resolve_config_date(start_date)).to_period("M").to_timestamp()
+    end = pd.to_datetime(_resolve_config_date(end_date)).to_period("M").to_timestamp()
     months = pd.date_range(start=start, end=end, freq="MS")
 
     windows: list[tuple[pd.Timestamp, pd.Timestamp]] = []

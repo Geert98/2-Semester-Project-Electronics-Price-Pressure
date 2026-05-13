@@ -168,6 +168,8 @@ NEWSDATA_API_KEY=your_newsdata_key
 
 The Guardian developer tier allows 1 call per second and 500 calls per day, so `configs/config.yaml` spaces Guardian requests by 1.2 seconds. The pipeline can request multiple Guardian pages per monthly window to increase article coverage while staying below that daily call limit. NewsAPI.org's free developer plan can search articles up to one month old with 100 requests per day, so this project uses it only as a recent-news source. NewsData.io free users are limited to 30 credits per 15 minutes, so NewsData requests are spaced by 31 seconds if that provider is enabled later.
 
+The news `end_date` can be set to `today` in `configs/config.yaml`. In that case, each scheduled workflow run automatically extends the Guardian backfill through the current month.
+
 #### 5. Optional: use UCloud MongoDB
 For a production-like setup, point the pipeline at an external MongoDB instance instead of the local Docker database:
 
