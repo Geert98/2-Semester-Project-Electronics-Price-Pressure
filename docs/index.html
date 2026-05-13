@@ -281,7 +281,7 @@
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-label">Prediction Month</div>
-                        <div class="metric-value">2026-02-01</div>
+                        <div class="metric-value">2026-03-01</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Predicted Pressure</div>
@@ -289,27 +289,27 @@
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Medium Probability</div>
-                        <div class="metric-value">65.09%</div>
+                        <div class="metric-value">56.21%</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">High Probability</div>
-                        <div class="metric-value">6.09%</div>
+                        <div class="metric-value">38.47%</div>
                     </div>
                 </div>
 
                 <div class="subsection-title">Prediction Probabilities</div>
                 <div class="probabilities">
                     <div class="bar-row">
-                        <div class="bar-label"><span>Low</span><span>28.82%</span></div>
-                        <div class="bar-track"><div class="bar-fill" style="width:28.817870998278778%"></div></div>
+                        <div class="bar-label"><span>Low</span><span>5.32%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="width:5.32457428302133%"></div></div>
                     </div>
                     <div class="bar-row">
-                        <div class="bar-label"><span>Medium</span><span>65.09%</span></div>
-                        <div class="bar-track"><div class="bar-fill" style="width:65.09491209972802%"></div></div>
+                        <div class="bar-label"><span>Medium</span><span>56.21%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="width:56.208956846360124%"></div></div>
                     </div>
                     <div class="bar-row">
-                        <div class="bar-label"><span>High</span><span>6.09%</span></div>
-                        <div class="bar-track"><div class="bar-fill" style="width:6.0872169019932105%"></div></div>
+                        <div class="bar-label"><span>High</span><span>38.47%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="width:38.46646887061855%"></div></div>
                     </div>
                 </div>
             </section>
@@ -323,11 +323,11 @@
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Macro F1</div>
-                        <div class="metric-value">0.261</div>
+                        <div class="metric-value">0.349</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Train Rows</div>
-                        <div class="metric-value">326</div>
+                        <div class="metric-value">327</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Test Rows</div>
@@ -337,7 +337,7 @@
 
                 <div class="subsection-title">Model Selection</div>
                 <div class="table-card">
-                    <h3>Selected Model: gradient_boosting</h3>
+                    <h3>Selected Model: logistic_regression</h3>
                     <table>
                         <thead>
                             <tr>
@@ -347,8 +347,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>logistic_regression</td><td>0.250</td><td>0.217</td></tr>
-<tr><td>gradient_boosting</td><td>0.250</td><td>0.261</td></tr>
+                            <tr><td>logistic_regression</td><td>0.250</td><td>0.349</td></tr>
+<tr><td>gradient_boosting</td><td>0.167</td><td>0.207</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -360,7 +360,7 @@
                         <table>
                             <tbody>
                                 <tr><td>low</td><td>121</td></tr>
-<tr><td>medium</td><td>110</td></tr>
+<tr><td>medium</td><td>111</td></tr>
 <tr><td>high</td><td>95</td></tr>
                             </tbody>
                         </table>
@@ -370,8 +370,8 @@
                         <h3>Test Distribution</h3>
                         <table>
                             <tbody>
-                                <tr><td>high</td><td>8</td></tr>
-<tr><td>medium</td><td>3</td></tr>
+                                <tr><td>high</td><td>9</td></tr>
+<tr><td>medium</td><td>2</td></tr>
 <tr><td>low</td><td>1</td></tr>
                             </tbody>
                         </table>
@@ -381,9 +381,9 @@
                         <h3>Predicted Distribution</h3>
                         <table>
                             <tbody>
-                                <tr><td>low</td><td>7</td></tr>
-<tr><td>medium</td><td>3</td></tr>
-<tr><td>high</td><td>2</td></tr>
+                                <tr><td>medium</td><td>9</td></tr>
+<tr><td>low</td><td>2</td></tr>
+<tr><td>high</td><td>1</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -399,7 +399,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr><th>low</th><td>1</td><td>0</td><td>0</td></tr><tr><th>medium</th><td>1</td><td>1</td><td>1</td></tr><tr><th>high</th><td>5</td><td>2</td><td>1</td></tr>
+            <tr><th>low</th><td>1</td><td>0</td><td>0</td></tr><tr><th>medium</th><td>1</td><td>1</td><td>0</td></tr><tr><th>high</th><td>0</td><td>8</td><td>1</td></tr>
         </tbody>
     </table>
     
@@ -418,24 +418,24 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>2024-09</td><td>32</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:64.0%"></div></div></td><td><span class="sentiment-value">0.073</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:7.3%"></div></div></td></tr>
-<tr><td>2024-10</td><td>34</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:68.0%"></div></div></td><td><span class="sentiment-value">0.044</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:4.4%"></div></div></td></tr>
-<tr><td>2024-11</td><td>36</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:72.0%"></div></div></td><td><span class="sentiment-value">0.018</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:1.8%"></div></div></td></tr>
-<tr><td>2024-12</td><td>27</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:54.0%"></div></div></td><td><span class="sentiment-value">0.169</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:16.9%"></div></div></td></tr>
-<tr><td>2025-01</td><td>39</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:78.0%"></div></div></td><td><span class="sentiment-value">-0.054</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:5.4%"></div></div></td></tr>
-<tr><td>2025-02</td><td>44</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:88.0%"></div></div></td><td><span class="sentiment-value">-0.047</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:4.7%"></div></div></td></tr>
-<tr><td>2025-03</td><td>40</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:80.0%"></div></div></td><td><span class="sentiment-value">-0.006</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:0.6%"></div></div></td></tr>
-<tr><td>2025-04</td><td>50</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:100.0%"></div></div></td><td><span class="sentiment-value">-0.024</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:2.4%"></div></div></td></tr>
-<tr><td>2025-05</td><td>42</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:84.0%"></div></div></td><td><span class="sentiment-value">0.143</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:14.3%"></div></div></td></tr>
-<tr><td>2025-06</td><td>38</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:76.0%"></div></div></td><td><span class="sentiment-value">-0.028</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:2.8%"></div></div></td></tr>
-<tr><td>2025-07</td><td>47</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:94.0%"></div></div></td><td><span class="sentiment-value">0.004</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:0.4%"></div></div></td></tr>
-<tr><td>2025-08</td><td>50</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:100.0%"></div></div></td><td><span class="sentiment-value">0.006</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:0.6%"></div></div></td></tr>
-<tr><td>2025-09</td><td>28</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:56.0%"></div></div></td><td><span class="sentiment-value">0.026</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:2.6%"></div></div></td></tr>
-<tr><td>2025-10</td><td>50</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:100.0%"></div></div></td><td><span class="sentiment-value">0.035</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:3.5%"></div></div></td></tr>
-<tr><td>2025-11</td><td>50</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:100.0%"></div></div></td><td><span class="sentiment-value">0.040</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:4.0%"></div></div></td></tr>
-<tr><td>2025-12</td><td>43</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:86.0%"></div></div></td><td><span class="sentiment-value">0.091</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:9.1%"></div></div></td></tr>
-<tr><td>2026-01</td><td>37</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:74.0%"></div></div></td><td><span class="sentiment-value">0.078</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:7.8%"></div></div></td></tr>
-<tr><td>2026-02</td><td>33</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:66.0%"></div></div></td><td><span class="sentiment-value">0.043</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:4.3%"></div></div></td></tr>
+                    <tr><td>2024-10</td><td>34</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:46.6%"></div></div></td><td><span class="sentiment-value">0.044</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:4.4%"></div></div></td></tr>
+<tr><td>2024-11</td><td>36</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:49.3%"></div></div></td><td><span class="sentiment-value">0.018</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:1.8%"></div></div></td></tr>
+<tr><td>2024-12</td><td>27</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:37.0%"></div></div></td><td><span class="sentiment-value">0.169</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:16.9%"></div></div></td></tr>
+<tr><td>2025-01</td><td>39</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:53.4%"></div></div></td><td><span class="sentiment-value">-0.054</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:5.4%"></div></div></td></tr>
+<tr><td>2025-02</td><td>44</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:60.3%"></div></div></td><td><span class="sentiment-value">-0.047</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:4.7%"></div></div></td></tr>
+<tr><td>2025-03</td><td>40</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:54.8%"></div></div></td><td><span class="sentiment-value">-0.006</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:0.6%"></div></div></td></tr>
+<tr><td>2025-04</td><td>64</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:87.7%"></div></div></td><td><span class="sentiment-value">-0.046</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:4.6%"></div></div></td></tr>
+<tr><td>2025-05</td><td>42</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:57.5%"></div></div></td><td><span class="sentiment-value">0.143</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:14.3%"></div></div></td></tr>
+<tr><td>2025-06</td><td>38</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:52.1%"></div></div></td><td><span class="sentiment-value">-0.028</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:2.8%"></div></div></td></tr>
+<tr><td>2025-07</td><td>47</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:64.4%"></div></div></td><td><span class="sentiment-value">0.004</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:0.4%"></div></div></td></tr>
+<tr><td>2025-08</td><td>61</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:83.6%"></div></div></td><td><span class="sentiment-value">-0.022</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-negative" style="width:2.2%"></div></div></td></tr>
+<tr><td>2025-09</td><td>28</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:38.4%"></div></div></td><td><span class="sentiment-value">0.026</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:2.6%"></div></div></td></tr>
+<tr><td>2025-10</td><td>61</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:83.6%"></div></div></td><td><span class="sentiment-value">0.041</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:4.1%"></div></div></td></tr>
+<tr><td>2025-11</td><td>73</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:100.0%"></div></div></td><td><span class="sentiment-value">0.000</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:0.0%"></div></div></td></tr>
+<tr><td>2025-12</td><td>43</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:58.9%"></div></div></td><td><span class="sentiment-value">0.091</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:9.1%"></div></div></td></tr>
+<tr><td>2026-01</td><td>37</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:50.7%"></div></div></td><td><span class="sentiment-value">0.078</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:7.8%"></div></div></td></tr>
+<tr><td>2026-02</td><td>33</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:45.2%"></div></div></td><td><span class="sentiment-value">0.043</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:4.3%"></div></div></td></tr>
+<tr><td>2026-03</td><td>42</td><td><div class="mini-bar-track"><div class="mini-bar-fill volume-fill" style="width:57.5%"></div></div></td><td><span class="sentiment-value">0.071</span><div class="mini-bar-track sentiment-track"><div class="mini-bar-fill sentiment-positive" style="width:7.1%"></div></div></td></tr>
                 </tbody>
             </table>
         </section>
@@ -451,8 +451,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>2024-09</td><td>0.10</td><td>70.24</td></tr>
-<tr><td>2024-10</td><td>-0.35</td><td>71.98</td></tr>
+                    <tr><td>2024-10</td><td>-0.35</td><td>71.98</td></tr>
 <tr><td>2024-11</td><td>-0.29</td><td>69.95</td></tr>
 <tr><td>2024-12</td><td>-0.27</td><td>70.12</td></tr>
 <tr><td>2025-01</td><td>-0.19</td><td>75.74</td></tr>
@@ -469,6 +468,7 @@
 <tr><td>2025-12</td><td>0.55</td><td>57.97</td></tr>
 <tr><td>2026-01</td><td>0.44</td><td>60.04</td></tr>
 <tr><td>2026-02</td><td>0.55</td><td>64.51</td></tr>
+<tr><td>2026-03</td><td>0.68</td><td>91.38</td></tr>
                 </tbody>
             </table>
         </section>
@@ -485,26 +485,26 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>2026-03-31</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/technology/2026/mar/31/macbook-neo-review-budget-apple-laptop-iphone-chip" target="_blank" rel="noopener noreferrer">MacBook Neo review: the budget Apple laptop powered by an iPhone chip</a></td></tr>
-<tr><td>2026-03-30</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/music/2026/mar/30/chip-taylor-obituary" target="_blank" rel="noopener noreferrer">Chip Taylor obituary</a></td></tr>
-<tr><td>2026-03-28</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/football/live/2026/mar/28/england-reaction-scotland-buildup-and-derby-day-in-wsl-matchday-live" target="_blank" rel="noopener noreferrer">England reaction, Scotland buildup and derby day in WSL – as it happened</a></td></tr>
-<tr><td>2026-03-27</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/technology/2026/mar/27/sony-playstation-5-price-hike-ai-iran-war" target="_blank" rel="noopener noreferrer">Sony to hike PS5 prices by $100 as AI and Iran war push up memory chip costs</a></td></tr>
-<tr><td>2026-03-27</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/thefilter-us/2026/mar/27/best-pfas-free-rain-jacket-coat" target="_blank" rel="noopener noreferrer">The best Pfas-free rain jackets in the US</a></td></tr>
-<tr><td>2026-03-26</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/us-news/live/2026/mar/25/donald-trump-classified-documents-us-politics-live-latest" target="_blank" rel="noopener noreferrer">Trump praises ICE agents he sent to US airports and again suggests deploying national guard amid DHS shutdown – as it happened</a></td></tr>
-<tr><td>2026-03-25</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/us-news/2026/mar/25/datacenters-bernie-sanders-aoc" target="_blank" rel="noopener noreferrer">Bernie Sanders and AOC introduce bill to pause building of new datacenters</a></td></tr>
-<tr><td>2026-03-25</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/food/2026/mar/25/25-best-worst-novelty-hot-cross-buns-tested-uk" target="_blank" rel="noopener noreferrer">‘Truly vile’: the UK’s 25 best (and worst) novelty hot cross buns – tested!</a></td></tr>
-<tr><td>2026-03-23</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/food/2026/mar/23/united-states-of-mancunia-american-fast-food-manchester" target="_blank" rel="noopener noreferrer">Welcome to the United States of Mancunia</a></td></tr>
-<tr><td>2026-03-23</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/commentisfree/2026/mar/23/memorial-benches-hartlepool-dead-people-loved" target="_blank" rel="noopener noreferrer">Why are memorial benches so popular? Because they keep the dead present in the flow of everyday life | Anne Karpf</a></td></tr>
-<tr><td>2026-03-23</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/technology/2026/mar/23/iphone-17e-review-apple-cheapest-new-smartphone-chip-magsafe-storage" target="_blank" rel="noopener noreferrer">iPhone 17e review: Apple upgrades its cheapest new smartphone</a></td></tr>
-<tr><td>2026-03-22</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/news/ng-interactive/2026/mar/22/iran-war-global-economy-donald-trump-oil-prices-inflation" target="_blank" rel="noopener noreferrer">‘The stakes are enormous’: how a prolonged Iran war could shock the global economy</a></td></tr>
-<tr><td>2026-03-21</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/thefilter/2026/mar/21/best-supermarket-frozen-peas-tasted-rated" target="_blank" rel="noopener noreferrer">‘Alive, fruity and with a soft texture’: the best supermarket frozen peas, tasted and rated</a></td></tr>
-<tr><td>2026-03-21</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/business/2026/mar/21/west-carmakers-retreat-electric-vehicle-risks-irrelevance-iran-war-evs-china" target="_blank" rel="noopener noreferrer">‘It’s stupid’: why western carmakers’ retreat from electric risks dooming them to irrelevance</a></td></tr>
-<tr><td>2026-03-21</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/environment/2026/mar/21/lincolnshire-solar-farm-controversy-british-countryside" target="_blank" rel="noopener noreferrer">‘It was our little idyll – until the solar farm landed’: the battle raging in the heart of the British countryside</a></td></tr>
-<tr><td>2026-03-21</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/lifeandstyle/2026/mar/21/pet-passport-dodge-travel-uk-eu-animal-health-certificate" target="_blank" rel="noopener noreferrer">Owners from Great Britain travelling to EU warned over pet passport ‘dodge’</a></td></tr>
-<tr><td>2026-03-19</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/technology/2026/mar/19/inside-chinas-robotics-revolution" target="_blank" rel="noopener noreferrer">Inside China’s robotics revolution</a></td></tr>
-<tr><td>2026-03-18</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/politics/2026/mar/18/memory-loss-strikes-down-starmer-and-badenoch-at-an-infuriating-pmqs" target="_blank" rel="noopener noreferrer">Memory loss strikes down Starmer and Badenoch at an infuriating PMQs | John Crace</a></td></tr>
-<tr><td>2026-03-18</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/travel/2026/mar/18/tintern-monmouthshire-wales-pub-with-rooms-short-break" target="_blank" rel="noopener noreferrer">On the trail of the Romantics in the Welsh borders</a></td></tr>
-<tr><td>2026-03-16</td><td>guardian</td><td>The Guardian</td><td><a href="https://www.theguardian.com/thefilter-us/2026/jan/17/best-nonalcoholic-wines" target="_blank" rel="noopener noreferrer">Far from ‘upcharged grape juice’, these are the 13 most exciting nonalcoholic wines in the US right now</a></td></tr>
+                    <tr><td>2026-05-12</td><td>newsapi</td><td>sixcolors.com</td><td><a href="https://sixcolors.com/post/2026/05/how-i-restarted-using-rss-and-actually-noticed/" target="_blank" rel="noopener noreferrer">How I restarted using RSS, and actually noticed!</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>Ibtimes.com.au</td><td><a href="https://www.ibtimes.com.au/alphabet-stock-dips-041-385-investors-digest-heavy-ai-spending-cloud-momentum-1868673" target="_blank" rel="noopener noreferrer">Alphabet Stock Dips 0.41% to $385 as Investors Digest Heavy AI Spending and Cloud Momentum</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>Upenn.edu</td><td><a href="https://knowledge.wharton.upenn.edu/article/ais-supply-chain-problem/" target="_blank" rel="noopener noreferrer">AI’s Supply Chain Problem</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>Brandingstrategyinsider.com</td><td><a href="https://brandingstrategyinsider.com/harley-davidsons-brand-problem-is-bigger-than-its-bikes/" target="_blank" rel="noopener noreferrer">Harley-Davidson’s Brand Problem Is Bigger Than Its Bikes</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>PRNewswire</td><td><a href="https://www.prnewswire.com/news-releases/asphalt-paving-material-market-to-reach-usd-395-billion-by-2033-driven-by-expanding-infrastructure-development-and-demand-for-durable-road-construction-materials-verified-market-research-302769508.html" target="_blank" rel="noopener noreferrer">Asphalt Paving Material Market to Reach USD 395 Billion by 2033, Driven by Expanding Infrastructure Development and Demand for Durable Road Construction Materials: Verified Market Research</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>Wccftech</td><td><a href="https://wccftech.com/few-unit-of-msi-vector-16-hx-ai-gaming-laptop-with-rtx-5070-ti-220-off-on-amazon/" target="_blank" rel="noopener noreferrer">Only Few Units Of MSI’s Vector 16 HX AI Gaming Laptop Remain At $220 Off On Amazon, Giving You A Limited Window To Grab This RTX 5070 Ti Gaming Laptop</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>esquire.com</td><td><a href="https://www.esquire.com/lifestyle/tech/a71253743/apple-memorial-day-deals-2026/" target="_blank" rel="noopener noreferrer">The Best Apple Deals to Grab Ahead of Memorial Day</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>BusinessLine</td><td><a href="https://www.thehindubusinessline.com/info-tech/syrma-sgs-expects-30-revenue-growth-in-fy27-exports-to-cross-1500-crore/article70969955.ece" target="_blank" rel="noopener noreferrer">Syrma SGS expects 30% revenue growth in FY27, exports to cross ₹1,500 crore</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>9to5Mac</td><td><a href="https://9to5mac.com/2026/05/12/deals-m5-macbook-pro-m5-pro-apple-magsafe-battery/" target="_blank" rel="noopener noreferrer">Deals: 32GB M5 MacBook Pro $300 off, 48GB M5 Pro $300 off, iPad Air, Apple MagSafe Battery 40% off, more</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>Mactrast.com</td><td><a href="https://www.mactrast.com/2026/05/apple-to-take-aggressive-pricing-strategy-for-iphone-18-pro-despite-ram-crisis/" target="_blank" rel="noopener noreferrer">Apple to Take ‘Aggressive Pricing Strategy’ for iPhone 18 Pro Despite RAM Crisis</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>Livemint</td><td><a href="https://www.livemint.com/companies/company-results/dixon-vivo-jv-dixon-q4-results-mobile-demand-press-note-3-11778596179815.html" target="_blank" rel="noopener noreferrer">Dixon pins FY27 growth hopes on Vivo JV approval, steady mobile demand</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>Adweek</td><td><a href="https://www.adweek.com/brand-marketing/coca-cola-is-so-good-at-marketing-everyone-forgot-to-notice/" target="_blank" rel="noopener noreferrer">Coca-Cola Is So Good at Marketing, Everyone Forgot to Notice</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>GlobeNewswire</td><td><a href="https://www.globenewswire.com/news-release/2026/05/12/3293153/28124/en/15-82-Billion-Automotive-Camera-Market-Forecast-2033-Surround-View-Cameras-Drive-Rapid-Growth-in-Automotive-Industry.html" target="_blank" rel="noopener noreferrer">$15.82 Billion Automotive Camera Market Forecast, 2033 | Surround-View Cameras Drive Rapid Growth in Automotive Industry</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>MarketBeat</td><td><a href="https://www.marketbeat.com/instant-alerts/novanta-q1-earnings-call-highlights-2026-05-12/?utm_source=yahoofinance&amp;amp;utm_medium=yahoofinance" target="_blank" rel="noopener noreferrer">Novanta Q1 Earnings Call Highlights</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>BusinessLine</td><td><a href="https://www.thehindubusinessline.com/news/syrma-sgs-expects-30-revenue-growth-in-fy27-exports-to-cross-1500-crore/article70969955.ece" target="_blank" rel="noopener noreferrer">Syrma SGS expects 30% revenue growth in FY27, exports to cross ₹1,500 crore</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>Upenn.edu</td><td><a href="https://knowledge.wharton.upenn.edu/article/lasting-loyalty-why-unreasonable-hospitality-wins/" target="_blank" rel="noopener noreferrer">Lasting Loyalty: Why ‘Unreasonable Hospitality’ Wins</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>BusinessLine</td><td><a href="https://www.thehindubusinessline.com/money-and-banking/india-has-a-strong-economic-runway-for-at-least-next-15-20-years-citi-india-chief/article70969726.ece" target="_blank" rel="noopener noreferrer">India has a strong economic runway for at least next 15-20 years: Citi India chief</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>Tom&#x27;s Hardware UK</td><td><a href="https://www.tomshardware.com/tech-industry/semiconductors/tsmc-allocates-usd20-billion-to-arizona-expansion-project-faces-water-and-labor-shortages-complicated-by-visa-rules" target="_blank" rel="noopener noreferrer">TSMC allocates $20 billion to Arizona expansion — project faces water and labor shortages, complicated by visa rules</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>The Times of India</td><td><a href="https://economictimes.indiatimes.com/markets/stocks/earnings/dixon-tech-q4-profit-falls-36-despite-revenue-growth-and-expansion-plans/articleshow/131042862.cms" target="_blank" rel="noopener noreferrer">Dixon Tech Q4 profit falls 36% despite revenue growth and expansion plans</a></td></tr>
+<tr><td>2026-05-12</td><td>newsapi</td><td>GlobeNewswire</td><td><a href="https://www.globenewswire.com/news-release/2026/05/12/3293125/0/en/Brand-New-Online-Casinos-USA-No-Deposit-Bonus-Free-Real-Money-Casino-No-Deposit-Free-Spins-by-Betus.html" target="_blank" rel="noopener noreferrer">Brand New Online Casinos USA No Deposit Bonus | Free Real Money Casino No Deposit Free Spins by Betus</a></td></tr>
                 </tbody>
             </table>
         </section>

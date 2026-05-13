@@ -1,7 +1,7 @@
 {
-  "month": "2026-02-01",
+  "month": "2026-03-01",
   "predicted_next_month_pressure": "medium",
-  "proba_low": 0.2881787099827878,
-  "proba_medium": 0.6509491209972802,
-  "proba_high": 0.0608721690199321
+  "proba_low": 0.0532457428302133,
+  "proba_medium": 0.5620895684636013,
+  "proba_high": 0.3846646887061855
 }
