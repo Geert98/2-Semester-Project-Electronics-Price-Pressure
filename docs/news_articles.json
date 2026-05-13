@@ -1,5 +1,125 @@
 [
   {
+    "published_at": "2026-05-13",
+    "provider": "guardian",
+    "source": "The Guardian",
+    "title": "Nvidia\u2019s Jensen Huang joins other US bosses on Trump trip to China",
+    "url": "https://www.theguardian.com/technology/2026/may/13/nvidia-jensen-huang-joins-trump-as-tech-dominates-china-trip",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "guardian",
+    "source": "The Guardian",
+    "title": "Trump-Xi China summit: five key issues on the agenda",
+    "url": "https://www.theguardian.com/world/2026/may/13/donald-trump-china-sumit-5-key-issues-xi-jinping",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "guardian",
+    "source": "The Guardian",
+    "title": "Kash Patel lobs false claims about top Democrat as they spar over allegations of FBI chief\u2019s excessive drinking on the job \u2013 as it happened",
+    "url": "https://www.theguardian.com/us-news/live/2026/may/12/donald-trump-china-iran-redistricting-jeffrey-epstein-latest-news-updates",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "ABC News (AU)",
+    "title": "Will property tax changes level the playing field or raise the drawbridge?",
+    "url": "https://www.abc.net.au/news/2026-05-13/will-cgt-and-negative-gearing-make-housing-cheaper/106665146",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "Storagereview.com",
+    "title": "Seagate IronWolf Pro 32TB Review: Top-of-Stack Capacity for Multi-Bay NAS",
+    "url": "https://www.storagereview.com/review/seagate-ironwolf-pro-32tb-review-top-of-stack-capacity-for-multi-bay-nas",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "CNET",
+    "title": "This Powerful 2TB M5 Pro MacBook Pro Is Back to Its All-Time Low Price",
+    "url": "https://www.cnet.com/deals/m5-pro-macbook-pro-deal/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "New York Post",
+    "title": "House prices will plummet in 300 US housing markets, study finds",
+    "url": "https://nypost.com/2026/05/12/real-estate/house-prices-will-plummet-in-these-300-us-housing-markets/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "Forbes",
+    "title": "From Diet Coke To Helium: Consumers Feeling Iran War Shortages",
+    "url": "https://www.forbes.com/sites/maryroeloffs/2026/05/12/from-diet-coke-to-helium-consumers-feeling-iran-war-shortages/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "Pypi.org",
+    "title": "maru-deep-pro-search 0.9.3",
+    "url": "https://pypi.org/project/maru-deep-pro-search/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "Bringatrailer.com",
+    "title": "2004 Nissan Maxima 3.5 SE at No Reserve",
+    "url": "https://bringatrailer.com/listing/2004-nissan-maxima-5/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "Theleadsm.com",
+    "title": "Yankees Benefitted From Missing Out on Soto",
+    "url": "https://theleadsm.com/yankees-benefitted-from-missing-out-on-soto/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=yankees-benefitted-from-missing-out-on-soto",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "GlobeNewswire",
+    "title": "Nuclear Diamond Batteries, Inc. (OTC: NDBI) Receives Second U.S. Patent Allowance Advancing Commercialization of Ultra-Long-Life Nuclear Diamond Battery Platform",
+    "url": "https://www.globenewswire.com/news-release/2026/05/12/3293310/0/en/Nuclear-Diamond-Batteries-Inc-OTC-NDBI-Receives-Second-U-S-Patent-Allowance-Advancing-Commercialization-of-Ultra-Long-Life-Nuclear-Diamond-Battery-Platform.html",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "The Times of India",
+    "title": "Can China's Xi rescue Trump from a bruising West Asia war?",
+    "url": "https://economictimes.indiatimes.com/opinion/et-commentary/can-chinas-xi-rescue-trump-from-a-bruising-west-asia-war/articleshow/131047575.cms",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "Electrek",
+    "title": "Rivian rolls out \u2018Hey Rivian\u2019 AI assistant with full vehicle control",
+    "url": "http://electrek.co/2026/05/12/rivian-hey-rivian-ai-assistant-vehicle-control/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-12",
+    "provider": "newsapi",
+    "source": "CNA",
+    "title": "Samsung Electronics, S. Korean labor union fail to reach pay deal, strike looms",
+    "url": "https://www.channelnewsasia.com/business/samsung-electronics-s-korean-labor-union-fail-reach-pay-deal-strike-looms-6116676",
+    "language": "en"
+  },
+  {
     "published_at": "2026-05-12",
     "provider": "newsapi",
     "source": "9to5Mac",
@@ -37,126 +157,6 @@
     "source": "Dealnews.com",
     "title": "AT&T Internet & Fiber Plans + shipping varies",
     "url": "https://www.dealnews.com/AT-T-Internet-Fiber-Plans-shipping-varies/21832380.html",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Observer",
-    "title": "16 Business Leaders to Join Trump on High-Stakes China Trip, With Notable Absences",
-    "url": "https://observer.com/2026/05/16-business-leaders-to-join-trump-on-high-stakes-china-trip-with-notable-absences/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "The Times of India",
-    "title": "Behind tariffs and tech curbs, US and China are learning to coexist as rivals",
-    "url": "https://economictimes.indiatimes.com/opinion/et-commentary/behind-tariffs-and-tech-curbs-us-and-china-are-learning-to-coexist-as-rivals/articleshow/131046240.cms",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "SoraNews24",
-    "title": "War in Iran causing dark development for potato chip packages in Japan",
-    "url": "https://soranews24.com/2026/05/13/war-in-iran-causing-dark-development-for-potato-chip-packages-in-japan/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "MakeUseOf",
-    "title": "Notepad++ isn't the best app for huge files anymore \u2014 I tested the alternatives",
-    "url": "https://www.makeuseof.com/best-apps-open-large-files-windows/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Decider",
-    "title": "\u2018Project Hail Mary\u2019 Comes to Digital, But When Will \u2018Project Hail Mary\u2019 Be Streaming Free on Amazon Prime Video?",
-    "url": "https://decider.com/2026/05/12/project-hail-mary-movie-streaming-release-date-amazon-prime-video-free/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Hot Hardware",
-    "title": "Dell XPS 16 (2026) Review: Thin, Elegant And Surprisingly Fast",
-    "url": "https://hothardware.com/reviews/new-dell-xps-16-da16260-review",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Techpowerup.com",
-    "title": "(PR) Global Semiconductor Materials Market Revenue Reaches Record $73.2 Billion in 2025",
-    "url": "https://www.techpowerup.com/348980/global-semiconductor-materials-market-revenue-reaches-record-usd-73-2-billion-in-2025",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Liliputing",
-    "title": "Milk-V Jupiter2 is mini PC with a SpacemiT K3 RISC-V processor",
-    "url": "https://liliputing.com/milk-v-jupiter2-is-mini-pc-with-a-spacemit-k3-risc-v-processor/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Newser",
-    "title": "Iran Conflict Puts Japan's Top Snack in Black and White",
-    "url": "https://www.newser.com/story/388974/iran-conflict-puts-japans-top-snack-in-black-and-white.html",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Github.com",
-    "title": "Show HN: Profine \u2013 Profile and rewrite your PyTorch training loop on real GPUs",
-    "url": "https://github.com/ProfineAI/profine-cli",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Ibtimes.com.au",
-    "title": "Apple Stock Edges Higher Near $294 as Record Earnings, AI Investments and Buyback Boost Confidence in 2026",
-    "url": "https://www.ibtimes.com.au/apple-stock-edges-higher-near-294-record-earnings-ai-investments-buyback-boost-confidence-2026-1868684",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "9to5Toys",
-    "title": "Mammotion\u2019s newest LUBA 3 AWD robot mowers get up to $700 savings + FREE garage attachment at lows from $2,099",
-    "url": "http://9to5toys.com/2026/05/12/mammotion-luba-3-awd-robot-mowers-free-garage-attachment-from-2099/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Macworld",
-    "title": "The M5 MacBook Pro just got an incredible $300 discount",
-    "url": "https://www.macworld.com/article/3137597/the-m5-macbook-pro-just-got-an-incredible-300-discount.html",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "GSMArena.com",
-    "title": "IDC: India's smartphone market declined 4.1% in Q1, vivo still dominates",
-    "url": "https://www.gsmarena.com/idc_indias_smartphone_market_declined_41_in_q1_vivo_still_dominates-news-72787.php",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Techpowerup.com",
-    "title": "TSMC Allocates $20 Billion for Arizona Fab Expansion, but Faces Challenges",
-    "url": "https://www.techpowerup.com/348976/tsmc-allocates-usd-20-billion-for-arizona-fab-expansion-but-faces-challenges",
     "language": "en"
   }
 ]
