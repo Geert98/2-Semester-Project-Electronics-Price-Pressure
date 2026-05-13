@@ -29,15 +29,15 @@ storage:
     fred_db_path: data/db/fred.sqlite3
 
 news:
-  use_gdelt: false
+  use_gdelt: true
   use_guardian: true
   use_newsdata: false
-  start_date: "2024-01-01"
+  start_date: "2023-01-01"
   end_date: "2026-03-31"
-  query: '((semiconductor OR DRAM OR NAND OR SSD) AND (price OR shortage OR tariff OR supply))'
-  max_records_per_window: 25
+  query: '((semiconductor OR microchip OR chips OR DRAM OR NAND OR SSD OR memory) AND (price OR prices OR shortage OR tariff OR supply OR demand OR "export controls"))'
+  max_records_per_window: 50
   window: monthly
-  sleep_seconds: 1.2
+  sleep_seconds: 5
   max_retries: 3
   retry_base_sleep: 3
   guardian:
