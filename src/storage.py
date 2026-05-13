@@ -8,6 +8,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from pymongo import MongoClient
+from pymongo.operations import UpdateOne
 
 
 def _get_storage_config(config: dict[str, Any]) -> dict[str, Any]:
@@ -50,6 +51,24 @@ def dataframe_to_mongo_records(df: pd.DataFrame) -> list[dict[str, Any]]:
     return records
 
 
+def _deduplicate_collection_by_keys(collection: Any, key_columns: list[str]) -> int:
+    group_id = {column: f"${column}" for column in key_columns}
+    pipeline = [
+        {"$match": {column: {"$nin": [None, ""]} for column in key_columns}},
+        {"$group": {"_id": group_id, "ids": {"$push": "$_id"}, "count": {"$sum": 1}}},
+        {"$match": {"count": {"$gt": 1}}},
+    ]
+
+    deleted_count = 0
+    for duplicate_group in collection.aggregate(pipeline):
+        ids_to_delete = duplicate_group["ids"][1:]
+        if ids_to_delete:
+            result = collection.delete_many({"_id": {"$in": ids_to_delete}})
+            deleted_count += result.deleted_count
+
+    return deleted_count
+
+
 def save_dataframe_to_mongo(df: pd.DataFrame, config: dict[str, Any], collection_name: str) -> None:
     uri, db_name = get_mongo_settings(config)
     client = MongoClient(uri, serverSelectionTimeoutMS=5000)
@@ -60,6 +79,42 @@ def save_dataframe_to_mongo(df: pd.DataFrame, config: dict[str, Any], collection
 
         if not df.empty:
             collection.insert_many(dataframe_to_mongo_records(df))
+    finally:
+        client.close()
+
+
+def upsert_dataframe_to_mongo(
+    df: pd.DataFrame,
+    config: dict[str, Any],
+    collection_name: str,
+    key_columns: list[str],
+) -> int:
+    uri, db_name = get_mongo_settings(config)
+    client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+    try:
+        client.admin.command("ping")
+        collection = client[db_name][collection_name]
+
+        if df.empty:
+            return 0
+
+        unique_df = df.dropna(subset=key_columns).drop_duplicates(
+            subset=key_columns,
+            keep="last",
+        )
+        records = dataframe_to_mongo_records(unique_df)
+        operations = []
+        for record in records:
+            filter_query = {column: record[column] for column in key_columns}
+            operations.append(UpdateOne(filter_query, {"$set": record}, upsert=True))
+
+        if not operations:
+            return 0
+
+        _deduplicate_collection_by_keys(collection, key_columns)
+        collection.create_index([(column, 1) for column in key_columns], unique=True)
+        result = collection.bulk_write(operations, ordered=False)
+        return result.upserted_count + result.modified_count
     finally:
         client.close()
 

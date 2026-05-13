@@ -131,6 +131,7 @@ The full pipeline performs the following steps:
 
 ---
 MongoDB is required for the news pipeline. The default local setup uses Docker Compose, while a production-like setup can point `MONGO_URI` to an external MongoDB service such as UCloud.
+Raw news articles are upserted by URL in MongoDB, so repeated pipeline runs add new articles and update existing ones without deleting previously ingested Guardian or NewsAPI.org articles.
 ---
 
 ## Build, Run, and Reproduce

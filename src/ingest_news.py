@@ -23,7 +23,7 @@ from collections.abc import Callable
 import pandas as pd
 import requests
 
-from src.storage import save_dataframe_to_mongo
+from src.storage import upsert_dataframe_to_mongo
 from src.utils import load_config, setup_env
 
 logger = logging.getLogger(__name__)
@@ -835,9 +835,14 @@ def ingest_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     df = pd.DataFrame(rows, columns=expected_columns)
 
     raw_collection = config["storage"]["mongo"]["raw_news_collection"]
-    save_dataframe_to_mongo(df, config, raw_collection)
+    changed_count = upsert_dataframe_to_mongo(df, config, raw_collection, key_columns=["url"])
 
-    logger.info("Saved raw news to MongoDB collection %s (%s rows)", raw_collection, len(df))
+    logger.info(
+        "Upserted raw news to MongoDB collection %s (%s fetched rows, %s changed rows)",
+        raw_collection,
+        len(df),
+        changed_count,
+    )
     return df
 
 
