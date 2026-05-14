@@ -1,6 +1,110 @@
 [
   {
     "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "GlobeNewswire",
+    "title": "Automotive Optical Fiber Communication and Supply Chain Research Report 2026 Featuring Automotive Optical Fiber Communication Layout of 5 OEMs, 8 Architecture Solutions, & 12 Communication Components",
+    "url": "https://www.globenewswire.com/news-release/2026/05/13/3293721/28124/en/Automotive-Optical-Fiber-Communication-and-Supply-Chain-Research-Report-2026-Featuring-Automotive-Optical-Fiber-Communication-Layout-of-5-OEMs-8-Architecture-Solutions-12-Communica.html",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "Crypto Briefing",
+    "title": "Nvidia CEO Jensen Huang excluded from Trump\u2019s China trip, then joins last minute",
+    "url": "https://cryptobriefing.com/nvidia-huang-trump-china-trip/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "Fox News",
+    "title": "Trump denounces \u2018crazy\u2019 Iran plan, US analysts contradict White House, as he faces tough meeting with China",
+    "url": "https://www.foxnews.com/opinion/trump-denounces-crazy-iran-plan-us-analysts-contradict-white-house-faces-tough-meeting-china",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "Fortune",
+    "title": "Encrypted texts reveal how Nvidia chips and U.S. tech are being smuggled to China and Russia",
+    "url": "https://fortune.com/2026/05/13/nvidia-chip-smuggling-china-russia-iran-export-controls-supermicro/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "Abcnews.com",
+    "title": "Trump set to meet with Xi in Beijing as war and inflation weigh on his presidency",
+    "url": "https://abcnews.com/Business/wireStory/trump-set-meet-xi-beijing-war-inflation-weigh-132902502",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "Andymatuschak.org",
+    "title": "Apps and programming: two accidental tyrannies",
+    "url": "https://andymatuschak.org/tat/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "BGR",
+    "title": "This $700 Laptop Is Consumer Reports' Top Budget Pick",
+    "url": "https://www.bgr.com/2171718/acer-aspire-16-amazon-laptop-deal-consumer-reports-top-rated/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "The Next Web",
+    "title": "Europe\u2019s cloud dependency is a political risk, not just a technical one",
+    "url": "https://thenextweb.com/news/europes-cloud-dependency-political-risk/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "Crypto Briefing",
+    "title": "China confirms Trump visit for May 13-15 talks with Xi Jinping on Iran and trade",
+    "url": "https://cryptobriefing.com/trump-xi-beijing-summit-trade-iran/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "GlobeNewswire",
+    "title": "Global and China Passenger Car T-Box Market Report 2026: Standalone T-Box Installations Account for Over 74% - Domestic Suppliers Including Neusoft Zhixing, Huawei, and GosuncnWelink Lead the Market",
+    "url": "https://www.globenewswire.com/news-release/2026/05/13/3293693/28124/en/Global-and-China-Passenger-Car-T-Box-Market-Report-2026-Standalone-T-Box-Installations-Account-for-Over-74-Domestic-Suppliers-Including-Neusoft-Zhixing-Huawei-and-GosuncnWelink-Lea.html",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "Geeky Gadgets",
+    "title": "Why Apple Dropped Face ID for the iPhone Ultra Fold",
+    "url": "https://www.geeky-gadgets.com/iphone-ultra-fold-details-2/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "Bitcoinfoundation.org",
+    "title": "Bitcoin Price Bottomed at $60K, BitMEX Co-Founder Says",
+    "url": "https://bitcoinfoundation.org/news/bitcoin/bitcoin-price-bottomed-bitmex-cofounder/",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
+    "provider": "newsapi",
+    "source": "Theregister.com",
+    "title": "ZTE and MediaTek unveil Tri-band Wi-Fi 7, targeting a relatively unexplored premium niche in Brazil",
+    "url": "https://www.theregister.com/networks/2026/05/13/zte-and-mediatek-unveil-tri-band-wi-fi-7-targeting-a-relatively-unexplored-premium-niche-in-brazil/5239381",
+    "language": "en"
+  },
+  {
+    "published_at": "2026-05-13",
     "provider": "guardian",
     "source": "The Guardian",
     "title": "Nvidia\u2019s Jensen Huang joins other US bosses on Trump trip to China",
@@ -9,154 +113,50 @@
   },
   {
     "published_at": "2026-05-13",
-    "provider": "guardian",
-    "source": "The Guardian",
-    "title": "Trump-Xi China summit: five key issues on the agenda",
-    "url": "https://www.theguardian.com/world/2026/may/13/donald-trump-china-sumit-5-key-issues-xi-jinping",
+    "provider": "newsapi",
+    "source": "Digitimes",
+    "title": "L&T Semiconductor Technologies signs multiyear agreement with Synopsys for AI-enabled power module design",
+    "url": "https://www.digitimes.com/news/a20260513PR202/synopsys-development-software-design-electronics.html",
     "language": "en"
   },
   {
     "published_at": "2026-05-13",
-    "provider": "guardian",
-    "source": "The Guardian",
-    "title": "Kash Patel lobs false claims about top Democrat as they spar over allegations of FBI chief\u2019s excessive drinking on the job \u2013 as it happened",
-    "url": "https://www.theguardian.com/us-news/live/2026/may/12/donald-trump-china-iran-redistricting-jeffrey-epstein-latest-news-updates",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
     "provider": "newsapi",
-    "source": "ABC News (AU)",
-    "title": "Will property tax changes level the playing field or raise the drawbridge?",
-    "url": "https://www.abc.net.au/news/2026-05-13/will-cgt-and-negative-gearing-make-housing-cheaper/106665146",
+    "source": "TweakTown",
+    "title": "Sony reportedly looking at cutting PlayStation 6 memory to keep costs down",
+    "url": "https://www.tweaktown.com/news/111580/sony-reportedly-looking-at-cutting-playstation-6-memory-to-keep-costs-down/index.html",
     "language": "en"
   },
   {
-    "published_at": "2026-05-12",
+    "published_at": "2026-05-13",
     "provider": "newsapi",
-    "source": "Storagereview.com",
-    "title": "Seagate IronWolf Pro 32TB Review: Top-of-Stack Capacity for Multi-Bay NAS",
-    "url": "https://www.storagereview.com/review/seagate-ironwolf-pro-32tb-review-top-of-stack-capacity-for-multi-bay-nas",
+    "source": "War on the Rocks",
+    "title": "Dazed and Confused: How Marine Corps Promotion Boards Keep Getting It Wrong",
+    "url": "https://warontherocks.com/dazed-and-confused-how-marine-corps-promotion-boards-keep-getting-it-wrong/",
     "language": "en"
   },
   {
-    "published_at": "2026-05-12",
+    "published_at": "2026-05-13",
     "provider": "newsapi",
-    "source": "CNET",
-    "title": "This Powerful 2TB M5 Pro MacBook Pro Is Back to Its All-Time Low Price",
-    "url": "https://www.cnet.com/deals/m5-pro-macbook-pro-deal/",
+    "source": "The Indian Express",
+    "title": "Memory crisis is the \u2018black swan\u2019 moment for the mobile phone industry: Motorola India MD T M Narasimhan",
+    "url": "https://indianexpress.com/article/technology/tech-news-technology/memory-crisis-motorola-india-md-t-m-narasimhan-10687045/",
     "language": "en"
   },
   {
-    "published_at": "2026-05-12",
+    "published_at": "2026-05-13",
     "provider": "newsapi",
-    "source": "New York Post",
-    "title": "House prices will plummet in 300 US housing markets, study finds",
-    "url": "https://nypost.com/2026/05/12/real-estate/house-prices-will-plummet-in-these-300-us-housing-markets/",
+    "source": "Geeky Gadgets",
+    "title": "Move Over, S26 Ultra: The Samsung Galaxy Z TriFold 2\u2019s New S Pen Design Changes Everything",
+    "url": "https://www.geeky-gadgets.com/samsung-galaxy-z-trifold-2-s-pen/",
     "language": "en"
   },
   {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Forbes",
-    "title": "From Diet Coke To Helium: Consumers Feeling Iran War Shortages",
-    "url": "https://www.forbes.com/sites/maryroeloffs/2026/05/12/from-diet-coke-to-helium-consumers-feeling-iran-war-shortages/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Pypi.org",
-    "title": "maru-deep-pro-search 0.9.3",
-    "url": "https://pypi.org/project/maru-deep-pro-search/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Bringatrailer.com",
-    "title": "2004 Nissan Maxima 3.5 SE at No Reserve",
-    "url": "https://bringatrailer.com/listing/2004-nissan-maxima-5/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Theleadsm.com",
-    "title": "Yankees Benefitted From Missing Out on Soto",
-    "url": "https://theleadsm.com/yankees-benefitted-from-missing-out-on-soto/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=yankees-benefitted-from-missing-out-on-soto",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
+    "published_at": "2026-05-13",
     "provider": "newsapi",
     "source": "GlobeNewswire",
-    "title": "Nuclear Diamond Batteries, Inc. (OTC: NDBI) Receives Second U.S. Patent Allowance Advancing Commercialization of Ultra-Long-Life Nuclear Diamond Battery Platform",
-    "url": "https://www.globenewswire.com/news-release/2026/05/12/3293310/0/en/Nuclear-Diamond-Batteries-Inc-OTC-NDBI-Receives-Second-U-S-Patent-Allowance-Advancing-Commercialization-of-Ultra-Long-Life-Nuclear-Diamond-Battery-Platform.html",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "The Times of India",
-    "title": "Can China's Xi rescue Trump from a bruising West Asia war?",
-    "url": "https://economictimes.indiatimes.com/opinion/et-commentary/can-chinas-xi-rescue-trump-from-a-bruising-west-asia-war/articleshow/131047575.cms",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Electrek",
-    "title": "Rivian rolls out \u2018Hey Rivian\u2019 AI assistant with full vehicle control",
-    "url": "http://electrek.co/2026/05/12/rivian-hey-rivian-ai-assistant-vehicle-control/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "CNA",
-    "title": "Samsung Electronics, S. Korean labor union fail to reach pay deal, strike looms",
-    "url": "https://www.channelnewsasia.com/business/samsung-electronics-s-korean-labor-union-fail-reach-pay-deal-strike-looms-6116676",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "9to5Mac",
-    "title": "MacBook Neo shipping estimates just saw a positive turn for customers",
-    "url": "https://9to5mac.com/2026/05/12/macbook-neo-shipping-estimates-just-saw-a-positive-turn-for-customers/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Southernsavers.com",
-    "title": "Kroger Weekly Ad: 5/13-5/19",
-    "url": "https://www.southernsavers.com/kroger-weekly-ad-513-519-2/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Electrek",
-    "title": "Lectric Memorial Day offers $694 bundles + up to $500 off e-bikes, Mammotion LUBA 3 AWD robot mowers, more",
-    "url": "http://electrek.co/2026/05/12/lectric-memorial-day-e-bikes-mammotion-luba-3-awd-robot-mowers-more/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "The Irish Times",
-    "title": "UK bond yields hit 1998 levels as political crisis deepens",
-    "url": "https://www.irishtimes.com/business/2026/05/12/uk-bond-yields-hit-1998-levels-as-political-crisis-deepens/",
-    "language": "en"
-  },
-  {
-    "published_at": "2026-05-12",
-    "provider": "newsapi",
-    "source": "Dealnews.com",
-    "title": "AT&T Internet & Fiber Plans + shipping varies",
-    "url": "https://www.dealnews.com/AT-T-Internet-Fiber-Plans-shipping-varies/21832380.html",
+    "title": "Nanoimprint Lithography Systems Market Size to Hit USD 358.32 Million by 2035 | SNS Insider",
+    "url": "https://www.globenewswire.com/news-release/2026/05/13/3293682/0/en/Nanoimprint-Lithography-Systems-Market-Size-to-Hit-USD-358-32-Million-by-2035-SNS-Insider.html",
     "language": "en"
   }
 ]
