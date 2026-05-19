@@ -84,7 +84,8 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     """
     # Load shared project configuration to find storage locations.
     config = load_config(config_path)
-
+    
+    #Remind me to edit this for production, as it currently points to the test collections, which is intentional for testing purposes, but will need to be changed for the full pipeline run.
     raw_collection = config["storage"]["mongo"]["test_news_collection"]
     clean_collection = config["storage"]["mongo"]["test_clean_news_collection"]
 
@@ -100,6 +101,7 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
                 "source",
                 "language",
                 "seen_date",
+                "content",
                 "social_image",
                 "source_country",
                 "published_at",
@@ -115,6 +117,10 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     df["title"] = df["title"].fillna("")
     df["source"] = df["source"].fillna("")
     df["language"] = df["language"].fillna("")
+    if "content" not in df.columns:
+        df["content"] = ""
+    else:
+        df["content"] = df["content"].fillna("")
 
     # Parse the article timestamp.
     #
@@ -142,7 +148,9 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     ]
 
     # Create the cleaned text field used later for keyword counts and sentiment analysis.
-    df["clean_text"] = df["title"].apply(clean_text)
+    # Prefer the article body when it is available, and fall back to the title.
+    text_source = df["content"].where(df["content"].str.strip() != "", df["title"])
+    df["clean_text"] = text_source.apply(clean_text)
 
     # Create a monthly timestamp key for later aggregation in feature engineering.
     df["month"] = df["published_at"].dt.to_period("M").dt.to_timestamp()

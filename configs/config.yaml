@@ -46,7 +46,7 @@ news:
   guardian:
     api_key_env: GUARDIAN_API_KEY
     order_by: newest
-    show_fields: bodyText
+    show_fields: body
     min_request_interval_seconds: 1.2
     max_pages_per_window: 3
   newsapi:
