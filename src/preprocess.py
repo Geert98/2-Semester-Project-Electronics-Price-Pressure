@@ -85,8 +85,8 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     # Load shared project configuration to find storage locations.
     config = load_config(config_path)
 
-    raw_collection = config["storage"]["mongo"]["raw_news_collection"]
-    clean_collection = config["storage"]["mongo"]["clean_news_collection"]
+    raw_collection = config["storage"]["mongo"]["test_news_collection"]
+    clean_collection = config["storage"]["mongo"]["test_clean_news_collection"]
 
     df = load_dataframe_from_mongo(config, raw_collection, sort_by="seen_date")
     if df.empty:

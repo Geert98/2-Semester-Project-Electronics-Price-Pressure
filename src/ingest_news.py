@@ -844,7 +844,7 @@ def ingest_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
 
     df = pd.DataFrame(rows, columns=expected_columns)
 
-    raw_collection = config["storage"]["mongo"]["raw_news_collection"]
+    raw_collection = config["storage"]["mongo"]["test_news_collection"]
     changed_count = upsert_dataframe_to_mongo(df, config, raw_collection, key_columns=["url"])
 
     logger.info(
