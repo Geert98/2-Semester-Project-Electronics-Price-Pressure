@@ -8,6 +8,7 @@ from src.news_providers.gdelt import append_gdelt_rows
 from src.news_providers.guardian import append_guardian_rows
 from src.news_providers.newsapi import append_newsapi_rows
 from src.news_providers.newsdata import append_newsdata_rows
+from src.news_providers.webzio import append_webzio_rows
 
 
 ProviderRunner = Callable[[list[dict]], None]
@@ -76,6 +77,22 @@ def build_provider_runners(
             (
                 "newsdata",
                 lambda rows: append_newsdata_rows(
+                    rows=rows,
+                    news_cfg=news_cfg,
+                    query=query,
+                    max_records=max_records,
+                    windows=windows,
+                    max_retries=max_retries,
+                    retry_base_sleep=retry_base_sleep,
+                ),
+            )
+        )
+
+    if bool(news_cfg.get("use_webzio", False)):
+        runners.append(
+            (
+                "webzio",
+                lambda rows: append_webzio_rows(
                     rows=rows,
                     news_cfg=news_cfg,
                     query=query,

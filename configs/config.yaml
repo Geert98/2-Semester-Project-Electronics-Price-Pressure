@@ -32,12 +32,14 @@ storage:
 
 news:
   use_gdelt: false
-  use_guardian: true
+  use_guardian: false
   use_newsapi: false
   use_newsdata: false
+  use_webzio: true
   start_date: "2026-05-01"
   end_date: today
   query: '((semiconductor OR microchip OR chips OR DRAM OR NAND OR SSD OR memory) AND (price OR prices OR shortage OR tariff OR supply OR demand OR "export controls"))'
+  query_webzio: '(semiconductor OR microchip OR chips OR memory) (price OR shortage OR supply)'
   max_records_per_window: 50
   window: monthly
   sleep_seconds: 5
@@ -62,6 +64,24 @@ news:
     endpoint: archive
     language: en
     min_request_interval_seconds: 31
+  webzio:
+    api_key_env: WEBZIO_API_KEY
+    endpoint: newsApiLite
+    language: english
+    # Note: newsApiLite doesn't support sorting - returns results by relevancy
+    min_request_interval_seconds: 1.5
+    max_pages_per_window: 2
+    # Note: newsApiLite has strict limits - 1000 monthly calls, 10 results per call
+    include_fields:
+      - title
+      - text
+      - url
+      - published
+      - author
+      - thread.site
+    performance:
+      deduplicate: true
+      timeout_seconds: 30
 
 features:
   keywords:

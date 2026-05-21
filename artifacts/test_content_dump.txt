@@ -1,0 +1,18 @@
+provider: newsapi
+collection: test_news
+article_count: 1
+
+================================================================================
+ARTICLE 1
+provider: newsapi
+title: AMD’s Lisa Su meets China’s vice premier in Beijing as chip diplomacy intensifies
+source: The Next Web
+url: https://thenextweb.com/news/amd-lisa-su-china-he-lifeng-chip-cooperation/
+seen_date: 2026-05-19T12:25:07Z
+published_at: 
+language: en
+content:
+TL;DR
+AMD CEO Lisa Su met Chinese Vice Premier He Lifeng at Beijings Great Hall of the People on 18 May 2026, pledging to expand AMDs operations and investment in China. The meeting came two days af… [+5425 chars]
+
+================================================================================
