@@ -17,7 +17,10 @@ import logging
 import pandas as pd
 
 from src.news_providers.common import month_windows
-from src.news_providers.registry import build_provider_runners
+from src.news_providers.gdelt import append_gdelt_rows
+from src.news_providers.guardian import append_guardian_rows
+from src.news_providers.newsapi import append_newsapi_rows
+from src.news_providers.newsdata import append_newsdata_rows
 from src.storage import upsert_dataframe_to_mongo
 from src.utils import load_config
 
@@ -38,17 +41,12 @@ def ingest_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
 
     windows = month_windows(start_date, end_date)
 
-    provider_runners = build_provider_runners(
-        news_cfg=news_cfg,
-        query=query,
-        max_records=max_records,
-        windows=windows,
-        max_retries=max_retries,
-        retry_base_sleep=retry_base_sleep,
-        sleep_seconds=sleep_seconds,
-    )
+    use_gdelt = bool(news_cfg.get("use_gdelt", True))
+    use_guardian = bool(news_cfg.get("use_guardian", False))
+    use_newsapi = bool(news_cfg.get("use_newsapi", False))
+    use_newsdata = bool(news_cfg.get("use_newsdata", False))
 
-    if not provider_runners:
+    if not use_gdelt and not use_guardian and not use_newsapi and not use_newsdata:
         raise ValueError(
             "At least one news provider must be enabled: "
             "use_gdelt, use_guardian, use_newsapi, or use_newsdata."
@@ -56,9 +54,48 @@ def ingest_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
 
     rows: list[dict] = []
 
-    for provider_name, runner in provider_runners:
-        logger.info("Running %s ingestion", provider_name)
-        runner(rows)
+    if use_gdelt:
+        append_gdelt_rows(
+            rows=rows,
+            query=query,
+            max_records=max_records,
+            windows=windows,
+            max_retries=max_retries,
+            retry_base_sleep=retry_base_sleep,
+            sleep_seconds=sleep_seconds,
+        )
+
+    if use_guardian:
+        append_guardian_rows(
+            rows=rows,
+            news_cfg=news_cfg,
+            query=query,
+            max_records=max_records,
+            windows=windows,
+            max_retries=max_retries,
+            retry_base_sleep=retry_base_sleep,
+        )
+
+    if use_newsapi:
+        append_newsapi_rows(
+            rows=rows,
+            news_cfg=news_cfg,
+            query=query,
+            max_records=max_records,
+            max_retries=max_retries,
+            retry_base_sleep=retry_base_sleep,
+        )
+
+    if use_newsdata:
+        append_newsdata_rows(
+            rows=rows,
+            news_cfg=news_cfg,
+            query=query,
+            max_records=max_records,
+            windows=windows,
+            max_retries=max_retries,
+            retry_base_sleep=retry_base_sleep,
+        )
 
     expected_columns = [
         "provider",

@@ -32,12 +32,12 @@ storage:
 
 news:
   use_gdelt: false
-  use_guardian: false
+  use_guardian: true
   use_newsapi: false
   use_newsdata: false
-  use_webzio: true
-  start_date: "2026-05-01"
-  end_date: today
+  use_webzio: false
+  start_date: "2020-01-01"
+  end_date: "2024-12-31"
   query: '((semiconductor OR microchip OR chips OR DRAM OR NAND OR SSD OR memory) AND (price OR prices OR shortage OR tariff OR supply OR demand OR "export controls"))'
   query_webzio: '(semiconductor OR microchip OR chips OR memory) (price OR shortage OR supply)'
   max_records_per_window: 50
