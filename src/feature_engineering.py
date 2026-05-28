@@ -170,7 +170,7 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
     analyzer = SentimentIntensityAnalyzer()
 
     # Load the cleaned news dataset and the FRED table from persistent storage.
-    news_collection = config["storage"]["mongo"]["clean_news_collection"]
+    news_collection = config["storage"]["mongo"]["test_clean_news_collection"]
     news_df = load_dataframe_from_mongo(config, news_collection, sort_by="published_at")
 
     fred_path = get_sqlite_path(config)
