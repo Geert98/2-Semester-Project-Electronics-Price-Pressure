@@ -22,6 +22,7 @@ from __future__ import annotations
 
 from src.feature_engineering import build_feature_table
 from src.generate_pages_report import generate_pages_report
+from src.enrich_news_ai import enrich_news_ai
 from src.ingest_fred import ingest_fred
 from src.ingest_news import ingest_news
 from src.predict import predict_latest
@@ -79,16 +80,19 @@ def main() -> None:
     # Step 3: Clean and standardize the raw news data.
     preprocess_news()
 
-    # Step 4: Combine processed news and FRED data into a model-ready feature table.
+    # Step 4: Enrich cleaned articles with relevance and price-pressure labels.
+    enrich_news_ai()
+
+    # Step 5: Combine processed news and FRED data into a model-ready feature table.
     build_feature_table()
 
-    # Step 5: Train the baseline classifier and save model artifacts.
+    # Step 6: Train the baseline classifier and save model artifacts.
     train_model()
 
-    # Step 6: Generate the latest available prediction using the trained model.
+    # Step 7: Generate the latest available prediction using the trained model.
     prediction = predict_latest()
 
-    # Step 7: Generate the static dashboard for GitHub Pages.
+    # Step 8: Generate the static dashboard for GitHub Pages.
     report_path = generate_pages_report()
 
     # Print a short completion message and key output locations.

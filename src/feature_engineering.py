@@ -31,6 +31,68 @@ from src.utils import load_config
 
 logger = logging.getLogger(__name__)
 
+TEXT_FEATURE_CHAR_LIMIT = 5000
+
+RELEVANCE_TERMS = [
+    "semiconductor",
+    "semiconductors",
+    "microchip",
+    "microchips",
+    "chip",
+    "chips",
+    "dram",
+    "nand",
+    "ssd",
+    "memory",
+    "electronics",
+]
+
+UPWARD_PRESSURE_TERMS = [
+    "shortage",
+    "shortages",
+    "supply disruption",
+    "supply chain pressure",
+    "tariff",
+    "tariffs",
+    "export control",
+    "export controls",
+    "sanction",
+    "sanctions",
+    "chip ban",
+    "production halt",
+    "capacity constraint",
+    "lead time",
+    "price increase",
+    "rising prices",
+    "higher prices",
+    "demand surge",
+    "ai demand",
+    "inventory drawdown",
+]
+
+DOWNWARD_PRESSURE_TERMS = [
+    "oversupply",
+    "glut",
+    "inventory surplus",
+    "weak demand",
+    "price cut",
+    "price cuts",
+    "falling prices",
+    "lower prices",
+    "downturn",
+    "slowdown",
+    "excess inventory",
+]
+
+TOPIC_TERMS = {
+    "shortage": ["shortage", "shortages", "capacity constraint", "lead time"],
+    "tariff": ["tariff", "tariffs", "duties"],
+    "demand": ["demand", "ai demand", "demand surge", "data center"],
+    "supply_chain": ["supply chain", "logistics", "shipping", "disruption"],
+    "export_controls": ["export control", "export controls", "sanction", "sanctions", "chip ban"],
+    "oversupply": ["oversupply", "glut", "excess inventory", "inventory surplus"],
+}
+
 
 def _compute_sentiment(text: str, analyzer: SentimentIntensityAnalyzer) -> float:
     """
@@ -81,6 +143,30 @@ def _contains_keyword(text: str, keyword: str) -> int:
     if not isinstance(text, str):
         return 0
     return int(keyword.lower() in text.lower())
+
+
+def _count_terms(text: str, terms: list[str]) -> int:
+    """
+    Count how many configured terms appear in a cleaned article text.
+    """
+    if not isinstance(text, str) or not text:
+        return 0
+    normalized = text.lower()
+    return sum(1 for term in terms if term in normalized)
+
+
+def _bounded_relevance_score(text: str) -> float:
+    """
+    Estimate whether an article is actually about electronics/semiconductors.
+    """
+    return min(_count_terms(text, RELEVANCE_TERMS) / 2, 1.0)
+
+
+def _pressure_direction_score(text: str) -> int:
+    """
+    Positive values suggest upward price pressure; negative values suggest relief.
+    """
+    return _count_terms(text, UPWARD_PRESSURE_TERMS) - _count_terms(text, DOWNWARD_PRESSURE_TERMS)
 
 
 def _assign_target_class(value: float, low_cut: float, high_cut: float) -> str | float:
@@ -171,7 +257,13 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
 
     # Load the cleaned news dataset and the FRED table from persistent storage.
     news_collection = config["storage"]["mongo"]["test_clean_news_collection"]
+    enriched_collection = config["storage"]["mongo"].get("test_enriched_news_collection")
     news_df = load_dataframe_from_mongo(config, news_collection, sort_by="published_at")
+    enriched_df = (
+        load_dataframe_from_mongo(config, enriched_collection, sort_by="published_at")
+        if enriched_collection
+        else pd.DataFrame()
+    )
 
     fred_path = get_sqlite_path(config)
     fred_df = load_dataframe_from_sqlite(fred_path, "fred_series")
@@ -202,14 +294,30 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
         news_df["month"] = pd.to_datetime(news_df["month"], errors="coerce")
 
         # Compute article-level sentiment and a binary negative indicator.
-        news_df["sentiment"] = news_df["clean_text"].apply(lambda x: _compute_sentiment(x, analyzer))
+        news_df["full_text_len"] = news_df["clean_text"].fillna("").str.len()
+        news_df["signal_text"] = news_df["clean_text"].fillna("").str.slice(0, TEXT_FEATURE_CHAR_LIMIT)
+        news_df["sentiment"] = news_df["signal_text"].apply(lambda x: _compute_sentiment(x, analyzer))
         news_df["is_negative"] = (news_df["sentiment"] < 0).astype(int)
+        news_df["text_len"] = news_df["signal_text"].str.len()
+        news_df["has_article_body"] = (
+            news_df.get("content", pd.Series("", index=news_df.index)).fillna("").str.strip() != ""
+        ).astype(int)
+        news_df["relevance_score"] = news_df["signal_text"].apply(_bounded_relevance_score)
+        news_df["pressure_direction_score"] = news_df["signal_text"].apply(_pressure_direction_score)
+        news_df["pressure_strength"] = news_df["pressure_direction_score"].abs().clip(upper=5)
+        news_df["upward_pressure_article"] = (news_df["pressure_direction_score"] > 0).astype(int)
+        news_df["downward_pressure_article"] = (news_df["pressure_direction_score"] < 0).astype(int)
+
+        for topic, terms in TOPIC_TERMS.items():
+            news_df[f"topic_{topic}"] = news_df["signal_text"].apply(
+                lambda x, topic_terms=terms: int(_count_terms(x, topic_terms) > 0)
+            )
 
         # Create one binary keyword column per configured keyword.
         keywords = config["features"]["keywords"]
         for kw in keywords:
             col_name = f"kw_{kw.replace(' ', '_')}"
-            news_df[col_name] = news_df["clean_text"].apply(
+            news_df[col_name] = news_df["signal_text"].apply(
                 lambda x, keyword=kw: _contains_keyword(x, keyword)
             )
 
@@ -220,8 +328,19 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
             "sentiment": "mean",
             "is_negative": "mean",
             "title_len": "mean",
+            "full_text_len": "mean",
+            "text_len": "mean",
+            "has_article_body": "mean",
+            "relevance_score": "mean",
+            "pressure_direction_score": "mean",
+            "pressure_strength": "mean",
+            "upward_pressure_article": "mean",
+            "downward_pressure_article": "mean",
             "source": pd.Series.nunique,
         }
+
+        for topic in TOPIC_TERMS:
+            agg_dict[f"topic_{topic}"] = "sum"
 
         # Add monthly sums for each keyword feature.
         for kw in keywords:
@@ -238,10 +357,103 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
                     "sentiment": "avg_sentiment",
                     "is_negative": "negative_share",
                     "title_len": "avg_title_len",
+                    "full_text_len": "avg_full_text_len",
+                    "text_len": "avg_text_len",
+                    "has_article_body": "article_body_share",
+                    "relevance_score": "avg_relevance_score",
+                    "pressure_direction_score": "avg_pressure_direction_score",
+                    "pressure_strength": "avg_pressure_strength",
+                    "upward_pressure_article": "upward_pressure_share",
+                    "downward_pressure_article": "downward_pressure_share",
                     "source": "unique_sources",
                 }
             )
         )
+
+        if not enriched_df.empty:
+            enriched_df["published_at"] = pd.to_datetime(enriched_df["published_at"], errors="coerce")
+            enriched_df["month"] = pd.to_datetime(enriched_df["month"], errors="coerce")
+            enriched_df = enriched_df.dropna(subset=["month"])
+
+            enriched_df["is_relevant"] = enriched_df["is_relevant"].astype(int)
+            enriched_df["is_negative"] = enriched_df["is_negative"].astype(int)
+            enriched_df["ai_upward_pressure_article"] = (
+                enriched_df["price_pressure_direction"] == "upward"
+            ).astype(int)
+            enriched_df["ai_downward_pressure_article"] = (
+                enriched_df["price_pressure_direction"] == "downward"
+            ).astype(int)
+            enriched_df["ai_neutral_pressure_article"] = (
+                enriched_df["price_pressure_direction"] == "neutral"
+            ).astype(int)
+
+            ai_numeric_cols = [
+                "relevance_score",
+                "sentiment",
+                "is_negative",
+                "is_relevant",
+                "content_char_count",
+                "scored_char_count",
+                "price_pressure_direction_score",
+                "price_pressure_strength",
+                "ai_upward_pressure_article",
+                "ai_downward_pressure_article",
+                "ai_neutral_pressure_article",
+            ]
+            for col in ai_numeric_cols:
+                enriched_df[col] = pd.to_numeric(enriched_df[col], errors="coerce").fillna(0)
+
+            ai_agg_dict = {
+                "url": "count",
+                "relevance_score": "mean",
+                "sentiment": "mean",
+                "is_negative": "mean",
+                "is_relevant": ["mean", "sum"],
+                "content_char_count": "mean",
+                "scored_char_count": "mean",
+                "price_pressure_direction_score": "mean",
+                "price_pressure_strength": "mean",
+                "ai_upward_pressure_article": "mean",
+                "ai_downward_pressure_article": "mean",
+                "ai_neutral_pressure_article": "mean",
+            }
+
+            for topic in TOPIC_TERMS:
+                flag_col = f"topic_{topic}_flag"
+                count_col = f"topic_{topic}_count"
+                if flag_col in enriched_df.columns:
+                    enriched_df[flag_col] = pd.to_numeric(enriched_df[flag_col], errors="coerce").fillna(0)
+                    ai_agg_dict[flag_col] = "sum"
+                if count_col in enriched_df.columns:
+                    enriched_df[count_col] = pd.to_numeric(enriched_df[count_col], errors="coerce").fillna(0)
+                    ai_agg_dict[count_col] = "sum"
+
+            monthly_ai = enriched_df.groupby("month").agg(ai_agg_dict)
+            monthly_ai.columns = [
+                "_".join(col).strip("_") if isinstance(col, tuple) else col
+                for col in monthly_ai.columns.to_flat_index()
+            ]
+            ai_rename_map = {
+                "url_count": "ai_enriched_article_count",
+                "relevance_score_mean": "ai_avg_relevance_score",
+                "sentiment_mean": "ai_avg_sentiment",
+                "is_negative_mean": "ai_negative_share",
+                "is_relevant_mean": "ai_relevant_share",
+                "is_relevant_sum": "ai_relevant_article_count",
+                "content_char_count_mean": "ai_avg_content_char_count",
+                "scored_char_count_mean": "ai_avg_scored_char_count",
+                "price_pressure_direction_score_mean": "ai_avg_pressure_direction_score",
+                "price_pressure_strength_mean": "ai_avg_pressure_strength",
+                "ai_upward_pressure_article_mean": "ai_upward_pressure_share",
+                "ai_downward_pressure_article_mean": "ai_downward_pressure_share",
+                "ai_neutral_pressure_article_mean": "ai_neutral_pressure_share",
+            }
+            for topic in TOPIC_TERMS:
+                ai_rename_map[f"topic_{topic}_flag_sum"] = f"ai_topic_{topic}_article_count"
+                ai_rename_map[f"topic_{topic}_count_sum"] = f"ai_topic_{topic}_term_count"
+
+            monthly_ai = monthly_ai.reset_index().rename(columns=ai_rename_map)
+            monthly_news = monthly_news.merge(monthly_ai, on="month", how="left")
 
     # Create the monthly PPI table.
     monthly_ppi = (

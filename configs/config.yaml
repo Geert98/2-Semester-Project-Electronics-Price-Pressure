@@ -27,6 +27,7 @@ storage:
     clean_news_collection: clean_news
     test_news_collection: test_news
     test_clean_news_collection: test_clean_news
+    test_enriched_news_collection: test_enriched_news
   sqlite:
     fred_db_path: data/db/fred.sqlite3
 
@@ -82,6 +83,19 @@ news:
     performance:
       deduplicate: true
       timeout_seconds: 30
+
+ai_enrichment:
+  enabled: false
+  backend: groq
+  model: openai/gpt-oss-20b
+  api_key_env: GROQ_API_KEY
+  max_articles_per_run: 3
+  max_chars_per_article: 3000
+  min_prefilter_relevance_score: 0.5
+  request_timeout_seconds: 60
+  max_retries: 5
+  request_sleep_seconds: 8
+  stop_on_rate_limit: true
 
 features:
   keywords:
