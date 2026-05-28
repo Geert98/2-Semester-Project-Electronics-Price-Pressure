@@ -25,6 +25,8 @@ storage:
     database: electronics_price_pressure
     raw_news_collection: raw_news
     clean_news_collection: clean_news
+    test_news_collection: test_news
+    test_clean_news_collection: test_clean_news
   sqlite:
     fred_db_path: data/db/fred.sqlite3
 
@@ -33,9 +35,11 @@ news:
   use_guardian: true
   use_newsapi: true
   use_newsdata: false
+  use_webzio: false
   start_date: "2023-01-01"
   end_date: today
   query: '((semiconductor OR microchip OR chips OR DRAM OR NAND OR SSD OR memory) AND (price OR prices OR shortage OR tariff OR supply OR demand OR "export controls"))'
+  query_webzio: '(semiconductor OR microchip OR chips OR memory) (price OR shortage OR supply)'
   max_records_per_window: 50
   window: monthly
   sleep_seconds: 5
@@ -44,7 +48,7 @@ news:
   guardian:
     api_key_env: GUARDIAN_API_KEY
     order_by: newest
-    show_fields: trailText,thumbnail
+    show_fields: bodyText,thumbnail
     min_request_interval_seconds: 1.2
     max_pages_per_window: 3
   newsapi:
@@ -60,6 +64,24 @@ news:
     endpoint: archive
     language: en
     min_request_interval_seconds: 31
+  webzio:
+    api_key_env: WEBZIO_API_KEY
+    endpoint: newsApiLite
+    language: english
+    # Note: newsApiLite doesn't support sorting - returns results by relevancy
+    min_request_interval_seconds: 1.5
+    max_pages_per_window: 2
+    # Note: newsApiLite has strict limits - 1000 monthly calls, 10 results per call
+    include_fields:
+      - title
+      - text
+      - url
+      - published
+      - author
+      - thread.site
+    performance:
+      deduplicate: true
+      timeout_seconds: 30
 
 features:
   keywords:

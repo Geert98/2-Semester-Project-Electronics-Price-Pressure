@@ -17,49 +17,14 @@ from __future__ import annotations
 # to compute sentiment features, keyword counts, article volumes, and source counts.
 
 import logging
-import re
 
 import pandas as pd
 
 from src.storage import load_dataframe_from_mongo, save_dataframe_to_mongo
-from src.utils import load_config
+from src.text_cleaning import clean_news_text
+from src.utils import load_config, setup_env
 
 logger = logging.getLogger(__name__)
-
-
-def clean_text(text: str) -> str:
-    """
-    Apply basic text cleaning to article titles.
-
-    Why this function exists:
-    - The project uses article titles for keyword matching and sentiment analysis.
-    - Cleaning the text makes those downstream steps more consistent.
-    - The cleaning here is intentionally simple because this is an MVP pipeline.
-
-    Cleaning steps:
-    - convert text to lowercase
-    - remove URLs
-    - remove most special characters
-    - normalize repeated whitespace
-
-    Parameters
-    ----------
-    text : str
-        Raw text string to clean.
-
-    Returns
-    -------
-    str
-        Cleaned text string.
-    """
-    if not isinstance(text, str):
-        return ""
-
-    text = text.lower()
-    text = re.sub(r"http\S+", " ", text)
-    text = re.sub(r"[^a-z0-9\s\-]", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
 
 
 def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
@@ -85,8 +50,8 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     # Load shared project configuration to find storage locations.
     config = load_config(config_path)
 
-    raw_collection = config["storage"]["mongo"]["raw_news_collection"]
-    clean_collection = config["storage"]["mongo"]["clean_news_collection"]
+    raw_collection = config["storage"]["mongo"]["test_news_collection"]
+    clean_collection = config["storage"]["mongo"]["test_clean_news_collection"]
 
     df = load_dataframe_from_mongo(config, raw_collection, sort_by="seen_date")
     if df.empty:
@@ -100,6 +65,7 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
                 "source",
                 "language",
                 "seen_date",
+                "content",
                 "social_image",
                 "source_country",
                 "published_at",
@@ -115,6 +81,10 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     df["title"] = df["title"].fillna("")
     df["source"] = df["source"].fillna("")
     df["language"] = df["language"].fillna("")
+    if "content" not in df.columns:
+        df["content"] = ""
+    else:
+        df["content"] = df["content"].fillna("")
 
     # Parse the article timestamp.
     #
@@ -142,7 +112,10 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     ]
 
     # Create the cleaned text field used later for keyword counts and sentiment analysis.
-    df["clean_text"] = df["title"].apply(clean_text)
+    # Prefer the article body when it is available, and fall back to the title.
+    # The shared cleaner strips Guardian HTML while keeping visible text and link text.
+    text_source = df["content"].where(df["content"].str.strip() != "", df["title"])
+    df["clean_text"] = text_source.apply(clean_news_text)
 
     # Create a monthly timestamp key for later aggregation in feature engineering.
     df["month"] = df["published_at"].dt.to_period("M").dt.to_timestamp()
@@ -161,4 +134,5 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
 
 if __name__ == "__main__":
     # Allow the script to be run directly for manual preprocessing tests.
+    setup_env()
     preprocess_news()
