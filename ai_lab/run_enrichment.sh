@@ -24,20 +24,8 @@ if [[ ! -f "news_to_enrich.jsonl" ]]; then
   exit 1
 fi
 
-# Adapt these lines to the model/runtime available on AAU AI-LAB.
-# A common setup is to start an OpenAI-compatible vLLM server on the node,
-# then let run_enrichment_job.py call http://127.0.0.1:8000/v1/chat/completions.
-#
-# Example placeholder:
-# module load python/3.11 cuda
-# python -m vllm.entrypoints.openai.api_server \
-#   --model "$AI_LAB_MODEL" \
-#   --host 127.0.0.1 \
-#   --port 8000 &
-# SERVER_PID=$!
-# sleep 60
-
-export AI_LAB_BASE_URL="${AI_LAB_BASE_URL:-http://127.0.0.1:8000/v1}"
+export AI_LAB_BACKEND="${AI_LAB_BACKEND:-ollama}"
+export AI_LAB_BASE_URL="${AI_LAB_BASE_URL:-http://127.0.0.1:11434}"
 export AI_LAB_API_KEY="${AI_LAB_API_KEY:-EMPTY}"
 export AI_LAB_MODEL="${AI_LAB_MODEL:-CHANGE_ME}"
 
@@ -49,6 +37,31 @@ if [[ "$AI_LAB_MODEL" == "CHANGE_ME" ]]; then
   exit 1
 fi
 
+if [[ "$AI_LAB_BACKEND" == "ollama" ]]; then
+  if ! command -v ollama >/dev/null 2>&1; then
+    echo "ERROR: ollama command not found on this node."
+    echo "Try running these on AI-LAB first:"
+    echo "  module avail ollama"
+    echo "  which ollama"
+    echo "  ollama list"
+    exit 1
+  fi
+
+  echo "Starting Ollama server..."
+  export OLLAMA_HOST="${OLLAMA_HOST:-127.0.0.1:11434}"
+  ollama serve > logs/ollama-${SLURM_JOB_ID:-manual}.log 2>&1 &
+  SERVER_PID=$!
+  sleep 10
+
+  echo "Available Ollama models:"
+  ollama list || true
+fi
+
+if [[ "$AI_LAB_BACKEND" == "openai-compatible" ]]; then
+  echo "Using external/OpenAI-compatible endpoint. Make sure AI_LAB_BASE_URL is correct."
+fi
+
+echo "AI_LAB_BACKEND=$AI_LAB_BACKEND"
 echo "AI_LAB_BASE_URL=$AI_LAB_BASE_URL"
 echo "AI_LAB_MODEL=$AI_LAB_MODEL"
 echo "Input lines: $(wc -l < news_to_enrich.jsonl)"
@@ -56,6 +69,7 @@ echo "Input lines: $(wc -l < news_to_enrich.jsonl)"
 python run_enrichment_job.py \
   --input news_to_enrich.jsonl \
   --output news_enriched.jsonl \
+  --backend "$AI_LAB_BACKEND" \
   --model "$AI_LAB_MODEL" \
   --base-url "$AI_LAB_BASE_URL" \
   --api-key "$AI_LAB_API_KEY"
@@ -63,5 +77,6 @@ python run_enrichment_job.py \
 echo "Output lines: $(wc -l < news_enriched.jsonl 2>/dev/null || echo 0)"
 echo "=== News enrichment job finished ==="
 
-# If you started a local server above, uncomment:
-# kill "$SERVER_PID"
+if [[ "${SERVER_PID:-}" != "" ]]; then
+  kill "$SERVER_PID" || true
+fi

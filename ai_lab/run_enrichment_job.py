@@ -65,7 +65,40 @@ def _call_openai_compatible(base_url: str, api_key: str, model: str, record: dic
     return json.loads(content)
 
 
-def enrich_file(input_path: str, output_path: str, model: str, base_url: str, api_key: str, timeout: int) -> None:
+def _call_ollama(base_url: str, model: str, record: dict, timeout: int) -> dict:
+    response = requests.post(
+        base_url.rstrip("/") + "/api/chat",
+        json={
+            "model": model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a precise data labeling assistant. Return valid JSON only.",
+                },
+                {"role": "user", "content": _prompt(record)},
+            ],
+            "format": "json",
+            "stream": False,
+            "options": {
+                "temperature": 0,
+            },
+        },
+        timeout=timeout,
+    )
+    response.raise_for_status()
+    content = response.json()["message"]["content"]
+    return json.loads(content)
+
+
+def enrich_file(
+    input_path: str,
+    output_path: str,
+    backend: str,
+    model: str,
+    base_url: str,
+    api_key: str,
+    timeout: int,
+) -> None:
     input_file = Path(input_path)
     output_file = Path(output_path)
     output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -80,7 +113,10 @@ def enrich_file(input_path: str, output_path: str, model: str, base_url: str, ap
             record = json.loads(line)
             print(f"Processing line {line_number}: {record.get('title', '')[:100]}", flush=True)
             try:
-                parsed = _call_openai_compatible(base_url, api_key, model, record, timeout)
+                if backend == "ollama":
+                    parsed = _call_ollama(base_url, model, record, timeout)
+                else:
+                    parsed = _call_openai_compatible(base_url, api_key, model, record, timeout)
                 output = {
                     "url": record.get("url"),
                     "title": record.get("title"),
@@ -89,8 +125,8 @@ def enrich_file(input_path: str, output_path: str, model: str, base_url: str, ap
                     "month": record.get("month"),
                     "content_char_count": record.get("content_char_count", 0),
                     "scored_char_count": len(record.get("text", "")),
-                    "ai_backend": "aau_ai_lab",
-                    "enrichment_version": f"aau_ai_lab_{model}_v1",
+                    "ai_backend": f"aau_ai_lab_{backend}",
+                    "enrichment_version": f"aau_ai_lab_{backend}_{model}_v1",
                     "enriched_at": datetime.now(UTC).isoformat(),
                     **parsed,
                 }
@@ -108,11 +144,12 @@ def enrich_file(input_path: str, output_path: str, model: str, base_url: str, ap
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run AI-LAB article enrichment using an OpenAI-compatible endpoint.")
+    parser = argparse.ArgumentParser(description="Run AI-LAB article enrichment.")
     parser.add_argument("--input", default="news_to_enrich.jsonl")
     parser.add_argument("--output", default="news_enriched.jsonl")
+    parser.add_argument("--backend", choices=["openai-compatible", "ollama"], default=os.getenv("AI_LAB_BACKEND", "ollama"))
     parser.add_argument("--model", default=os.getenv("AI_LAB_MODEL", "CHANGE_ME"))
-    parser.add_argument("--base-url", default=os.getenv("AI_LAB_BASE_URL", "http://127.0.0.1:8000/v1"))
+    parser.add_argument("--base-url", default=os.getenv("AI_LAB_BASE_URL", "http://127.0.0.1:11434"))
     parser.add_argument("--api-key", default=os.getenv("AI_LAB_API_KEY", "EMPTY"))
     parser.add_argument("--timeout", type=int, default=120)
     args = parser.parse_args()
@@ -120,6 +157,7 @@ def main() -> None:
     enrich_file(
         input_path=args.input,
         output_path=args.output,
+        backend=args.backend,
         model=args.model,
         base_url=args.base_url,
         api_key=args.api_key,

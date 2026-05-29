@@ -21,10 +21,22 @@ Upload that file plus this `ai_lab/` folder to AI-LAB.
 
 ## AI-LAB run
 
-On AI-LAB, adapt the model endpoint/model command in `run_enrichment.sh`,
-then submit:
+On AI-LAB, first check which Ollama models are available:
 
 ```bash
+which ollama
+ollama list
+```
+
+Pick a model from `ollama list`. For a first test, prefer a smaller instruct
+model if available, for example `llama3.1:8b`, `mistral:7b`,
+`qwen2.5:7b-instruct`, or similar.
+
+Then submit:
+
+```bash
+export AI_LAB_BACKEND=ollama
+export AI_LAB_MODEL=<model-from-ollama-list>
 sbatch run_enrichment.sh
 ```
 
@@ -47,6 +59,16 @@ If the job appears to do nothing, inspect those files first:
 squeue -u $USER
 tail -n 100 logs/news-enrichment-*.out
 tail -n 100 logs/news-enrichment-*.err
+```
+
+If Ollama is not available, you can use an OpenAI-compatible model endpoint
+instead:
+
+```bash
+export AI_LAB_BACKEND=openai-compatible
+export AI_LAB_BASE_URL=http://127.0.0.1:8000/v1
+export AI_LAB_MODEL=<model-name>
+sbatch run_enrichment.sh
 ```
 
 Each line must contain at least:
