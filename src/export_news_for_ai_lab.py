@@ -10,6 +10,40 @@ import pandas as pd
 from src.storage import load_dataframe_from_mongo
 from src.utils import load_config, setup_env
 
+STRONG_DOMAIN_TERMS = [
+    "semiconductor",
+    "semiconductors",
+    "microchip",
+    "microchips",
+    "dram",
+    "nand",
+    "ssd",
+]
+
+GENERIC_DOMAIN_TERMS = [
+    "chip",
+    "chips",
+    "memory",
+    "electronics",
+]
+
+PRESSURE_TERMS = [
+    "price",
+    "prices",
+    "shortage",
+    "shortages",
+    "supply",
+    "demand",
+    "tariff",
+    "tariffs",
+    "export control",
+    "export controls",
+    "sanction",
+    "sanctions",
+    "oversupply",
+    "inventory",
+]
+
 
 def _json_default(value: Any) -> str | None:
     if value is None or pd.isna(value):
@@ -19,11 +53,34 @@ def _json_default(value: Any) -> str | None:
     return str(value)
 
 
+def _contains_any(text: str, terms: list[str]) -> bool:
+    normalized = text.lower()
+    return any(term in normalized for term in terms)
+
+
+def _prefilter_score(title: str, text: str) -> float:
+    title = title or ""
+    text = text or ""
+    score = 0.0
+
+    if _contains_any(title, STRONG_DOMAIN_TERMS):
+        score += 3.0
+    if _contains_any(title, GENERIC_DOMAIN_TERMS) and _contains_any(title, PRESSURE_TERMS):
+        score += 2.0
+    if _contains_any(text, STRONG_DOMAIN_TERMS):
+        score += 1.0
+    if _contains_any(text, GENERIC_DOMAIN_TERMS) and _contains_any(text, PRESSURE_TERMS):
+        score += 0.5
+
+    return score
+
+
 def export_news_for_ai_lab(
     config_path: str = "configs/config.yaml",
     output_path: str = "artifacts/ai_lab/news_to_enrich.jsonl",
     limit: int | None = 100,
     max_chars: int = 12000,
+    prefilter: bool = True,
 ) -> Path:
     setup_env()
     config = load_config(config_path)
@@ -41,6 +98,16 @@ def export_news_for_ai_lab(
     existing_urls = set(enriched_df["url"].dropna()) if "url" in enriched_df.columns else set()
     clean_df = clean_df.dropna(subset=["url"]).drop_duplicates(subset=["url"], keep="last")
     pending_df = clean_df[~clean_df["url"].isin(existing_urls)].copy()
+    if prefilter:
+        pending_df["prefilter_score"] = pending_df.apply(
+            lambda row: _prefilter_score(
+                str(row.get("title") or ""),
+                str(row.get("clean_text") or "")[:max_chars],
+            ),
+            axis=1,
+        )
+        pending_df = pending_df[pending_df["prefilter_score"] >= 1.0]
+        pending_df = pending_df.sort_values(["prefilter_score", "published_at"], ascending=[False, True])
     if limit is not None:
         pending_df = pending_df.head(limit)
 
@@ -71,6 +138,7 @@ def main() -> None:
     parser.add_argument("--output", default="artifacts/ai_lab/news_to_enrich.jsonl")
     parser.add_argument("--limit", type=int, default=100)
     parser.add_argument("--max-chars", type=int, default=12000)
+    parser.add_argument("--no-prefilter", action="store_true")
     args = parser.parse_args()
 
     export_news_for_ai_lab(
@@ -78,6 +146,7 @@ def main() -> None:
         output_path=args.output,
         limit=args.limit,
         max_chars=args.max_chars,
+        prefilter=not args.no_prefilter,
     )
 
 
