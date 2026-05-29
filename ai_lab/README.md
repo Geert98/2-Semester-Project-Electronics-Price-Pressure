@@ -21,17 +21,32 @@ Upload that file plus this `ai_lab/` folder to AI-LAB.
 
 ## AI-LAB run
 
-On AI-LAB, adapt the model endpoint/model command in `run_enrichment.slurm`,
+On AI-LAB, adapt the model endpoint/model command in `run_enrichment.sh`,
 then submit:
 
 ```bash
-sbatch run_enrichment.slurm
+sbatch run_enrichment.sh
 ```
 
 The job should produce:
 
 ```text
 news_enriched.jsonl
+```
+
+Slurm output is written to:
+
+```text
+logs/news-enrichment-<jobid>.out
+logs/news-enrichment-<jobid>.err
+```
+
+If the job appears to do nothing, inspect those files first:
+
+```bash
+squeue -u $USER
+tail -n 100 logs/news-enrichment-*.out
+tail -n 100 logs/news-enrichment-*.err
 ```
 
 Each line must contain at least:

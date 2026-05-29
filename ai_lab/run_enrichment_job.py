@@ -70,11 +70,15 @@ def enrich_file(input_path: str, output_path: str, model: str, base_url: str, ap
     output_file = Path(output_path)
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
+    success_count = 0
+    failure_count = 0
+
     with input_file.open("r", encoding="utf-8") as src, output_file.open("w", encoding="utf-8") as dst:
         for line_number, line in enumerate(src, start=1):
             if not line.strip():
                 continue
             record = json.loads(line)
+            print(f"Processing line {line_number}: {record.get('title', '')[:100]}", flush=True)
             try:
                 parsed = _call_openai_compatible(base_url, api_key, model, record, timeout)
                 output = {
@@ -91,9 +95,16 @@ def enrich_file(input_path: str, output_path: str, model: str, base_url: str, ap
                     **parsed,
                 }
                 dst.write(json.dumps(output, ensure_ascii=True) + "\n")
+                dst.flush()
+                success_count += 1
             except Exception as exc:
+                failure_count += 1
                 print(f"Failed line {line_number}: {exc}", flush=True)
             time.sleep(0.1)
+
+    print(f"Finished enrichment. success={success_count}, failures={failure_count}", flush=True)
+    if success_count == 0 and failure_count > 0:
+        raise RuntimeError("All enrichment calls failed. Check model, endpoint, and job logs.")
 
 
 def main() -> None:
