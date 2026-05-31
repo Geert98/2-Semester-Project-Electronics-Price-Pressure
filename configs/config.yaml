@@ -106,5 +106,5 @@ model:
   random_state: 42
   candidates:
     - logistic_regression
-    - gradient_boosting
+    - xgboost
   selection_metric: macro_f1

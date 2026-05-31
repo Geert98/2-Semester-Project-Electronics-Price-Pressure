@@ -25,8 +25,8 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
+from xgboost import XGBClassifier
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
@@ -36,6 +36,42 @@ from sklearn.preprocessing import StandardScaler
 from src.utils import load_config, save_json
 
 logger = logging.getLogger(__name__)
+
+
+class XGBStringClassifier:
+    """Wrap XGBoost so it can train on string class labels."""
+
+    def __init__(self, random_state: int):
+        self.random_state = random_state
+        self._label_to_int: dict[str, int] = {}
+        self._int_to_label: dict[int, str] = {}
+        self._model = XGBClassifier(
+            objective="multi:softprob",
+            eval_metric="mlogloss",
+            random_state=random_state,
+            n_estimators=250,
+            max_depth=4,
+            learning_rate=0.08,
+            subsample=0.9,
+            colsample_bytree=0.9,
+            tree_method="hist",
+        )
+
+    def fit(self, X, y):
+        labels = pd.Index(pd.Series(y).astype(str).unique()).sort_values()
+        self._label_to_int = {label: index for index, label in enumerate(labels)}
+        self._int_to_label = {index: label for label, index in self._label_to_int.items()}
+        encoded_y = pd.Series(y).astype(str).map(self._label_to_int).to_numpy()
+        self._model.fit(X, encoded_y)
+        self.classes_ = labels.to_numpy()
+        return self
+
+    def predict(self, X):
+        encoded_predictions = self._model.predict(X)
+        return pd.Series(encoded_predictions).map(self._int_to_label).to_numpy()
+
+    def predict_proba(self, X):
+        return self._model.predict_proba(X)
 
 
 def _build_preprocessor(feature_cols: list[str], scale_numeric: bool) -> ColumnTransformer:
@@ -68,8 +104,8 @@ def _build_model(model_name: str, random_state: int):
             random_state=random_state,
         )
 
-    if model_name == "gradient_boosting":
-        return GradientBoostingClassifier(random_state=random_state)
+    if model_name == "xgboost":
+        return XGBStringClassifier(random_state=random_state)
 
     raise ValueError(f"Unsupported model candidate: {model_name}")
 
@@ -106,46 +142,14 @@ def _evaluate_model(
     }
 
 
-def train_model(config_path: str = "configs/config.yaml") -> dict:
-    """
-    Train the baseline classification model using the monthly feature table.
-
-    Why this function exists:
-    - The project needs a reproducible model training step that can be rerun
-      whenever new data is ingested.
-    - The function trains a baseline classifier and stores the results as artifacts.
-    - A time-based split is used instead of a random split because the project
-      is forecasting future periods from past data.
-
-    Parameters
-    ----------
-    config_path : str
-        Path to the YAML configuration file.
-
-    Returns
-    -------
-    dict
-        Dictionary containing evaluation metrics and training metadata.
-    """
-    # Load configuration so paths and model settings come from the shared config file.
+def _load_training_frame(config_path: str) -> tuple[pd.DataFrame, list[str], list[str], int]:
     config = load_config(config_path)
-
-    # Define the input model table and output artifact locations.
     input_path = Path(config["paths"]["processed_dir"]) / "model_table.csv"
-    model_dir = Path(config["paths"]["model_dir"])
-    metrics_dir = Path(config["paths"]["metrics_dir"])
 
-    # Load the model-ready dataset.
     df = pd.read_csv(input_path)
-
-    # Ensure the time column is parsed correctly and sorted chronologically.
     df["month"] = pd.to_datetime(df["month"])
     df = df.sort_values("month").reset_index(drop=True)
 
-    # Read the number of months to keep as the test set.
-    test_size_months = int(config["model"]["test_size_months"])
-
-    # Select feature columns by excluding non-feature and target columns.
     feature_cols = [
         col for col in df.columns
         if col not in {
@@ -156,40 +160,44 @@ def train_model(config_path: str = "configs/config.yaml") -> dict:
         }
     ]
 
-    # Split the dataset into features (X) and target labels (y).
+    labels_order = ["low", "medium", "high"]
+    test_size_months = int(config["model"]["test_size_months"])
+
+    return df, feature_cols, labels_order, test_size_months
+
+
+def _split_train_test(
+    df: pd.DataFrame,
+    feature_cols: list[str],
+    test_size_months: int,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series, pd.Series]:
     X = df[feature_cols]
     y = df["target_class"]
 
-    # Ensure the dataset is large enough for the chosen train/test split.
-    # This protects the training step from failing silently on extremely small datasets.
     if len(df) <= test_size_months + 6:
         raise ValueError(
             f"Dataset is too small for training/test split. "
             f"Rows={len(df)}, requested test_size_months={test_size_months}"
         )
 
-    # Use a chronological split:
-    # - earlier rows for training
-    # - last N months for testing
-    #
-    # This is more realistic than a random split for time-dependent data.
     split_index = len(df) - test_size_months
     X_train, X_test = X.iloc[:split_index], X.iloc[split_index:]
     y_train, y_test = y.iloc[:split_index], y.iloc[split_index:]
     test_months = df["month"].iloc[split_index:]
 
-    # Log class balance in both train and test sets for transparency.
-    logger.info("Train class distribution:\n%s", y_train.value_counts().to_string())
-    logger.info("Test class distribution:\n%s", y_test.value_counts().to_string())
+    return X_train, X_test, y_train, y_test, test_months
 
-    # Define a fixed class order for evaluation outputs.
-    # This makes the confusion matrix and report easier to interpret consistently.
-    labels_order = ["low", "medium", "high"]
 
-    random_state = int(config["model"]["random_state"])
-    model_candidates = config["model"].get("candidates", ["logistic_regression"])
-    selection_metric = config["model"].get("selection_metric", "macro_f1")
-
+def _train_and_evaluate_models(
+    feature_cols: list[str],
+    X_train: pd.DataFrame,
+    y_train: pd.Series,
+    X_test: pd.DataFrame,
+    y_test: pd.Series,
+    model_candidates: list[str],
+    random_state: int,
+    labels_order: list[str],
+) -> tuple[dict[str, dict], dict[str, Pipeline]]:
     model_results: dict[str, dict] = {}
     trained_pipelines: dict[str, Pipeline] = {}
 
@@ -217,6 +225,64 @@ def train_model(config_path: str = "configs/config.yaml") -> dict:
             result["accuracy"],
             result["macro_f1"],
         )
+
+    return model_results, trained_pipelines
+
+
+def train_model(config_path: str = "configs/config.yaml") -> dict:
+    """
+    Train the baseline classification model using the monthly feature table.
+
+    Why this function exists:
+    - The project needs a reproducible model training step that can be rerun
+      whenever new data is ingested.
+    - The function trains a baseline classifier and stores the results as artifacts.
+    - A time-based split is used instead of a random split because the project
+      is forecasting future periods from past data.
+
+    Parameters
+    ----------
+    config_path : str
+        Path to the YAML configuration file.
+
+    Returns
+    -------
+    dict
+        Dictionary containing evaluation metrics and training metadata.
+    """
+    # Load configuration so paths and model settings come from the shared config file.
+    config = load_config(config_path)
+
+    # Define the output artifact locations.
+    model_dir = Path(config["paths"]["model_dir"])
+    metrics_dir = Path(config["paths"]["metrics_dir"])
+    df, feature_cols, labels_order, test_size_months = _load_training_frame(config_path)
+
+    # Split the dataset into features (X) and target labels (y).
+    X_train, X_test, y_train, y_test, test_months = _split_train_test(
+        df=df,
+        feature_cols=feature_cols,
+        test_size_months=test_size_months,
+    )
+
+    # Log class balance in both train and test sets for transparency.
+    logger.info("Train class distribution:\n%s", y_train.value_counts().to_string())
+    logger.info("Test class distribution:\n%s", y_test.value_counts().to_string())
+
+    random_state = int(config["model"]["random_state"])
+    model_candidates = config["model"].get("candidates", ["logistic_regression"])
+    selection_metric = config["model"].get("selection_metric", "macro_f1")
+
+    model_results, trained_pipelines = _train_and_evaluate_models(
+        feature_cols=feature_cols,
+        X_train=X_train,
+        y_train=y_train,
+        X_test=X_test,
+        y_test=y_test,
+        model_candidates=model_candidates,
+        random_state=random_state,
+        labels_order=labels_order,
+    )
 
     best_model_name = max(
         model_results,

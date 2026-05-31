@@ -59,6 +59,7 @@ GitHub Pages dashboard:
 │   ├── latest_prediction.json
 │   └── train_metrics.json
 ├── src/
+│   ├── compare_models.py
 │   ├── feature_engineering.py
 │   ├── generate_pages_report.py
 │   ├── ingest_fred.py
@@ -95,6 +96,9 @@ Feature engineering
 Model training
 	•	src/train.py
 
+Model comparison
+	•	src/compare_models.py
+
 Prediction
 	•	src/predict.py
 
@@ -124,7 +128,7 @@ The full pipeline performs the following steps:
 4.	Aggregate article-level data to monthly features
 5.	Build lagged and rolling structured features from SQLite-backed FRED data
 6.	Construct the next-period target class
-7.	Train and compare Logistic Regression and Gradient Boosting classifiers
+7.	Train and compare Logistic Regression and XGBoost classifiers
 8.	Evaluate models on a time-based holdout test set and save the best model
 9.	Generate the latest prediction artifact
 10.	Generate a static HTML report for GitHub Pages
