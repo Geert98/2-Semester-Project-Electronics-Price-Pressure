@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+from glob import glob
 from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
+from pymongo import MongoClient
 
-from src.storage import upsert_dataframe_to_mongo
+from src.storage import get_mongo_settings, upsert_dataframe_to_mongo
 from src.utils import load_config, setup_env
 
 
@@ -59,29 +61,54 @@ def _normalize_record(record: dict) -> dict:
     return normalized
 
 
+def _resolve_input_files(input_path: str) -> list[Path]:
+    path = Path(input_path)
+    if path.is_dir():
+        batch_files = sorted(path.glob("news_enriched_*.jsonl"))
+        if batch_files:
+            return batch_files
+        single_file = path / "news_enriched.jsonl"
+        return [single_file] if single_file.exists() else []
+    if any(char in input_path for char in "*?[]"):
+        return [Path(match) for match in sorted(glob(input_path))]
+    return [path]
+
+
 def import_ai_lab_enrichment(
     config_path: str = "configs/config.yaml",
-    input_path: str = "artifacts/ai_lab/news_enriched.jsonl",
+    input_path: str = "ai_lab/upload_bundle/results",
+    replace: bool = False,
 ) -> pd.DataFrame:
     setup_env()
     config = load_config(config_path)
     target_collection = config["storage"]["mongo"]["test_enriched_news_collection"]
 
-    path = Path(input_path)
-    if not path.exists():
-        raise FileNotFoundError(f"Missing AI-LAB enrichment output: {path}")
+    input_files = _resolve_input_files(input_path)
+    if not input_files:
+        raise FileNotFoundError(f"Missing AI-LAB enrichment output: {input_path}")
 
     records = []
-    with path.open("r", encoding="utf-8") as f:
-        for line in f:
-            if not line.strip():
-                continue
-            records.append(_normalize_record(json.loads(line)))
+    for path in input_files:
+        with path.open("r", encoding="utf-8") as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                records.append(_normalize_record(json.loads(line)))
 
     df = pd.DataFrame(records)
     if df.empty:
         print("No enrichment records found.")
         return df
+
+    if replace:
+        uri, db_name = get_mongo_settings(config)
+        client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+        try:
+            client.admin.command("ping")
+            delete_result = client[db_name][target_collection].delete_many({})
+            print(f"Deleted {delete_result.deleted_count} existing records from {target_collection}")
+        finally:
+            client.close()
 
     changed_count = upsert_dataframe_to_mongo(
         df,
@@ -89,17 +116,18 @@ def import_ai_lab_enrichment(
         target_collection,
         key_columns=["url"],
     )
-    print(f"Imported {len(df)} enrichment records into {target_collection} ({changed_count} changed)")
+    print(f"Imported {len(df)} enrichment records from {len(input_files)} file(s) into {target_collection} ({changed_count} changed)")
     return df
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Import AI-LAB JSONL enrichment output into MongoDB.")
     parser.add_argument("--config", default="configs/config.yaml")
-    parser.add_argument("--input", default="artifacts/ai_lab/news_enriched.jsonl")
+    parser.add_argument("--input", default="ai_lab/upload_bundle/results")
+    parser.add_argument("--replace", action="store_true", help="Delete existing target collection contents before importing.")
     args = parser.parse_args()
 
-    import_ai_lab_enrichment(config_path=args.config, input_path=args.input)
+    import_ai_lab_enrichment(config_path=args.config, input_path=args.input, replace=args.replace)
 
 
 if __name__ == "__main__":

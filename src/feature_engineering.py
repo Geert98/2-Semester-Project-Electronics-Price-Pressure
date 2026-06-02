@@ -27,7 +27,7 @@ import pandas as pd
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from src.storage import get_sqlite_path, load_dataframe_from_mongo, load_dataframe_from_sqlite
-from src.utils import load_config
+from src.utils import load_config, setup_env
 
 logger = logging.getLogger(__name__)
 
@@ -251,6 +251,9 @@ def build_feature_table(config_path: str = "configs/config.yaml") -> pd.DataFram
     pd.DataFrame
         Final model-ready feature table.
     """
+    # Load local environment variables before resolving MongoDB settings.
+    setup_env()
+
     # Load configuration and initialize the sentiment analyzer.
     config = load_config(config_path)
     analyzer = SentimentIntensityAnalyzer()

@@ -170,6 +170,17 @@ The Guardian developer tier allows 1 call per second and 500 calls per day, so `
 
 The news `end_date` can be set to `today` in `configs/config.yaml`. In that case, each scheduled workflow run automatically extends the Guardian backfill through the current month.
 
+For a historical Guardian backfill, run ingestion in date chunks. The broad query is useful when the downstream AI enrichment is responsible for filtering relevance:
+
+```bash
+python -m src.ingest_news --guardian-only --query-mode broad --start-date 1998-01-01 --end-date 2005-12-31 --guardian-max-pages 2
+python -m src.ingest_news --guardian-only --query-mode broad --start-date 2006-01-01 --end-date 2013-12-31 --guardian-max-pages 2
+python -m src.ingest_news --guardian-only --query-mode broad --start-date 2014-01-01 --end-date today --guardian-max-pages 2
+python -m src.preprocess
+```
+
+Increase `--guardian-max-pages` for more coverage, but keep the Guardian daily API limit in mind. Raw news is upserted by URL, so rerunning a date chunk updates existing rows instead of duplicating them.
+
 #### 5. Optional: use UCloud MongoDB
 For a production-like setup, point the pipeline at an external MongoDB instance instead of the local Docker database:
 

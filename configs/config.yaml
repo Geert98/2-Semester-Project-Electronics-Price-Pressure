@@ -37,9 +37,12 @@ news:
   use_newsapi: true
   use_newsdata: false
   use_webzio: false
-  start_date: "2023-01-01"
+  start_date: "1998-01-01"
   end_date: today
-  query: '((semiconductor OR microchip OR chips OR DRAM OR NAND OR SSD OR memory) AND (price OR prices OR shortage OR tariff OR supply OR demand OR "export controls"))'
+  query_mode: broad
+  query: '(semiconductor OR semiconductors OR microchip OR microchips OR "computer chip" OR "computer chips" OR chipmaker OR chipmakers OR "chip industry" OR "silicon chip" OR "integrated circuit" OR "integrated circuits" OR DRAM OR NAND OR SSD OR "memory chip" OR "memory chips" OR "electronic components" OR "consumer electronics")'
+  query_strict: '((semiconductor OR semiconductors OR microchip OR microchips OR "computer chip" OR "computer chips" OR chipmaker OR chipmakers OR "chip industry" OR DRAM OR NAND OR SSD OR "memory chip" OR "memory chips") AND (price OR prices OR shortage OR shortages OR tariff OR tariffs OR supply OR demand OR "export controls" OR "supply chain"))'
+  query_broad: '(semiconductor OR semiconductors OR microchip OR microchips OR "computer chip" OR "computer chips" OR chipmaker OR chipmakers OR "chip industry" OR "silicon chip" OR "integrated circuit" OR "integrated circuits" OR DRAM OR NAND OR SSD OR "memory chip" OR "memory chips" OR "electronic components" OR "consumer electronics")'
   query_webzio: '(semiconductor OR microchip OR chips OR memory) (price OR shortage OR supply)'
   max_records_per_window: 50
   window: monthly
@@ -96,6 +99,17 @@ ai_enrichment:
   max_retries: 5
   request_sleep_seconds: 8
   stop_on_rate_limit: true
+
+ai_lab_export:
+  output_path: ai_lab/upload_bundle/news_to_enrich.jsonl
+  bundle_dir: ai_lab/upload_bundle
+  limit:
+  batch_size: 100
+  max_chars: 12000
+  prefilter: true
+  default_model: Qwen/Qwen2.5-7B-Instruct
+  default_gpus: 1
+  default_max_model_len: 8192
 
 features:
   keywords:

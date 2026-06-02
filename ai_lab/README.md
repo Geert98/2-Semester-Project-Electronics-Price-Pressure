@@ -1,111 +1,144 @@
 # AI-LAB News Enrichment Batch
 
-This folder contains a template for running article enrichment as an offline
-batch job on AAU AI-LAB.
+This folder contains the minimal files needed to run article enrichment on AAU
+AI-LAB with Slurm, Singularity, and vLLM.
 
-## Local export
+## Prepare Upload Bundle
 
 From the project root on your local machine:
 
 ```bash
-python -m src.export_news_for_ai_lab --limit 100 --max-chars 12000
+python -m ai_lab.prepare_batch
 ```
 
-This writes:
+This exports all pending relevant articles from MongoDB, splits them into
+batches, and creates:
 
 ```text
-artifacts/ai_lab/news_to_enrich.jsonl
+ai_lab/upload_bundle/
 ```
 
-Upload that file plus this `ai_lab/` folder to AI-LAB.
-
-## AI-LAB run
-
-On AI-LAB, first check which Ollama models are available:
-
-```bash
-which ollama
-ollama list
-```
-
-Pick a model from `ollama list`. For a first test, prefer a smaller instruct
-model if available, for example `llama3.1:8b`, `mistral:7b`,
-`qwen2.5:7b-instruct`, or similar.
-
-Then submit:
-
-```bash
-export AI_LAB_BACKEND=ollama
-export AI_LAB_MODEL=<model-from-ollama-list>
-sbatch run_enrichment.sh
-```
-
-The job should produce:
+The important files are:
 
 ```text
-news_enriched.jsonl
+news_to_enrich.jsonl
+inputs/news_to_enrich_00000.jsonl
+inputs/news_to_enrich_00001.jsonl
+batch_manifest.json
 ```
 
-Slurm output is written to:
+Upload the contents of that folder to AI-LAB.
 
-```text
-logs/news-enrichment-<jobid>.out
-logs/news-enrichment-<jobid>.err
-```
+## Run On AI-LAB
 
-If the job appears to do nothing, inspect those files first:
+Inside the uploaded `upload_bundle` folder:
 
 ```bash
-squeue -u $USER
-tail -n 100 logs/news-enrichment-*.out
-tail -n 100 logs/news-enrichment-*.err
+sbatch run_ai_lab.sh qwen25-32b
 ```
 
-If Ollama is not available, you can use an OpenAI-compatible model endpoint
-instead:
+This runs all batch files in `inputs/` with one model load and writes one result
+file per batch.
 
-```bash
-export AI_LAB_BACKEND=openai-compatible
-export AI_LAB_BASE_URL=http://127.0.0.1:8000/v1
-export AI_LAB_MODEL=<model-name>
-sbatch run_enrichment.sh
-```
-
-Each line must contain at least:
-
-```json
-{
-  "url": "...",
-  "title": "...",
-  "is_relevant": true,
-  "relevance_score": 0.9,
-  "sentiment_score": -0.2,
-  "price_pressure_direction": "upward",
-  "price_pressure_strength": 4,
-  "primary_topic": "shortage",
-  "reason_short": "Article discusses chip shortages affecting electronics supply."
-}
-```
-
-## Local import
-
-Download `news_enriched.jsonl` to:
+Output lands in:
 
 ```text
-artifacts/ai_lab/news_enriched.jsonl
+logs/out/
+logs/err/
+results/news_enriched_00000.jsonl
+results/failed_records_00000.jsonl
 ```
 
-Then import to MongoDB:
+## Import Results
+
+After downloading the finished `upload_bundle` folder back into `ai_lab/`, run:
 
 ```bash
-python -m src.import_ai_lab_enrichment
+python -m ai_lab.import_enrichment
 ```
 
-The imported records are stored in:
+This imports all `ai_lab/upload_bundle/results/news_enriched_*.jsonl` files
+into MongoDB. For older single-file runs, it falls back to
+`results/news_enriched.jsonl`.
+
+## Models
+
+Default model:
 
 ```text
-test_enriched_news
+Qwen/Qwen2.5-7B-Instruct
 ```
 
-`src/feature_engineering.py` then aggregates those article-level labels into
-monthly `ai_*` model features.
+This is the model that has already loaded successfully on one L4 GPU.
+
+For a larger model that should be compatible with the current AI-LAB vLLM
+container, use Qwen 2.5 32B:
+
+```bash
+sbatch run_ai_lab.sh qwen25-32b
+```
+
+If it is not already in `$HOME/models/Qwen2.5-32B-Instruct`, the Slurm job
+creates the model folder, downloads the model, and then runs enrichment.
+
+Before the first large-model run, create a private env file on AI-LAB:
+
+```bash
+nano ~/.ai_lab_env
+chmod 600 ~/.ai_lab_env
+```
+
+Put this in the file:
+
+```bash
+HF_TOKEN=hf_your_token_here
+```
+
+You can also put optional defaults in the same file:
+
+```bash
+AI_LAB_QWEN25_32B_DIR=$HOME/models/Qwen2.5-32B-Instruct
+AI_LAB_GPUS=4
+AI_LAB_MAX_MODEL_LEN=4096
+```
+
+Do not put this env file inside the project folder or upload bundle.
+
+Qwen 3.6 currently fails on the AI-LAB `vllm-openai_latest.sif` container
+because the container's Transformers/vLLM stack does not recognize the
+`qwen3_5` architecture. It needs a newer vLLM/Transformers container. If AI-LAB
+provides one later, try:
+
+```bash
+sbatch run_ai_lab.sh qwen36
+```
+
+Check logs with:
+
+```bash
+tail -f logs/out/model-download-*.out
+tail -f logs/err/model-download-*.err
+tail -f logs/out/news-enrichment-*.out
+tail -f logs/err/news-enrichment-*.err
+```
+
+If you only want to download the model without running enrichment:
+
+```bash
+sbatch run_ai_lab.sh qwen36-download
+```
+
+If it runs out of memory, try more GPUs if AI-LAB allows it:
+
+```bash
+AI_LAB_GPUS=8 sbatch --gres=gpu:8 run_ai_lab.sh qwen25-32b
+```
+
+To see all script commands:
+
+```bash
+./run_ai_lab.sh help
+```
+
+Ollama is not used by this bundle because `ollama` was not available on the
+AI-LAB node.

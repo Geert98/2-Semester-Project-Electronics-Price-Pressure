@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +45,17 @@ PRESSURE_TERMS = [
     "inventory",
 ]
 
+NON_ELECTRONIC_CHIP_PATTERNS = [
+    "fish and chips",
+    "beer, chips",
+    "potato chips",
+    "poker chips",
+    "microchipped mouthguard",
+    "microchipped mouthguards",
+    "mouthguard",
+    "mouthguards",
+]
+
 
 def _json_default(value: Any) -> str | None:
     if value is None or pd.isna(value):
@@ -55,7 +67,12 @@ def _json_default(value: Any) -> str | None:
 
 def _contains_any(text: str, terms: list[str]) -> bool:
     normalized = text.lower()
-    return any(term in normalized for term in terms)
+    return any(re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", normalized) for term in terms)
+
+
+def _contains_non_electronic_chip_context(text: str) -> bool:
+    normalized = text.lower()
+    return any(pattern in normalized for pattern in NON_ELECTRONIC_CHIP_PATTERNS)
 
 
 def _prefilter_score(title: str, text: str) -> float:
@@ -72,13 +89,16 @@ def _prefilter_score(title: str, text: str) -> float:
     if _contains_any(text, GENERIC_DOMAIN_TERMS) and _contains_any(text, PRESSURE_TERMS):
         score += 0.5
 
+    if _contains_non_electronic_chip_context(f"{title} {text[:1000]}"):
+        score -= 3.0
+
     return score
 
 
 def export_news_for_ai_lab(
     config_path: str = "configs/config.yaml",
-    output_path: str = "artifacts/ai_lab/news_to_enrich.jsonl",
-    limit: int | None = 100,
+    output_path: str = "ai_lab/upload_bundle/news_to_enrich.jsonl",
+    limit: int | None = None,
     max_chars: int = 12000,
     prefilter: bool = True,
 ) -> Path:
@@ -135,18 +155,21 @@ def export_news_for_ai_lab(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Export cleaned news articles for AI-LAB batch enrichment.")
     parser.add_argument("--config", default="configs/config.yaml")
-    parser.add_argument("--output", default="artifacts/ai_lab/news_to_enrich.jsonl")
-    parser.add_argument("--limit", type=int, default=100)
-    parser.add_argument("--max-chars", type=int, default=12000)
+    parser.add_argument("--output")
+    parser.add_argument("--limit", type=int)
+    parser.add_argument("--max-chars", type=int)
     parser.add_argument("--no-prefilter", action="store_true")
     args = parser.parse_args()
 
+    config = load_config(args.config)
+    export_cfg = config.get("ai_lab_export", {})
+
     export_news_for_ai_lab(
         config_path=args.config,
-        output_path=args.output,
-        limit=args.limit,
-        max_chars=args.max_chars,
-        prefilter=not args.no_prefilter,
+        output_path=args.output or export_cfg.get("output_path", "ai_lab/upload_bundle/news_to_enrich.jsonl"),
+        limit=args.limit if args.limit is not None else export_cfg.get("limit"),
+        max_chars=args.max_chars if args.max_chars is not None else export_cfg.get("max_chars", 12000),
+        prefilter=False if args.no_prefilter else export_cfg.get("prefilter", True),
     )
 
 

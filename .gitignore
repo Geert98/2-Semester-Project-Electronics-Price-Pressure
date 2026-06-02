@@ -7,3 +7,11 @@ __pycache__/
 .vscode/
 artifacts/eda/
 artifacts/ai_lab/*.jsonl
+artifacts/ai_lab/upload_bundle/
+ai_lab/upload_bundle/
+ai_lab/news-enrichment-*.out
+ai_lab/news-enrichment-*.err
+ai_lab/news_enriched*.jsonl
+ai_lab/logs/
+ai_lab/Succesful_Tries/
+ai_lab/Successful_Tries/
