@@ -42,6 +42,11 @@ GitHub Pages dashboard:
 ├── app/
 │   ├── api.py
 │   └── streamlit_app.py
+├── ai_lab/
+│   ├── prepare_batch.py
+│   ├── import_enrichment.py
+│   ├── run_ai_lab.sh
+│   └── enrich_articles.py
 ├── artifacts/
 │   ├── metrics/
 │   │   └── train_metrics.json
@@ -166,6 +171,7 @@ AI-LAB evidence bundle for examiners. It is intentionally ignored by Git because
 its `inputs/` folder contains article text and runtime logs. If it is shared
 separately, examiners can inspect `results/news_enriched_*.jsonl`,
 `results/news_judged_*.jsonl`, and the AI-LAB logs without needing MongoDB.
+See `ai_lab/OFFLINE_BUNDLE.md` for checksum and external sharing notes.
 
 ### Full Refresh
 
@@ -240,62 +246,21 @@ python -m src.preprocess
 
 Increase `--guardian-max-pages` for more coverage, but keep the Guardian daily API limit in mind. Raw news is upserted by URL, so rerunning a date chunk updates existing rows instead of duplicating them.
 
-To test Hacker News as a semiconductor source-discovery and tech-attention signal, run:
-
-```bash
-python -m src.news_providers.hackernews --start-date 2025-01-01 --end-date 2025-12-31 --query semiconductor --pages 1 --max-records 20
-```
-
-This does not write to MongoDB. It writes a mapped sample to `artifacts/hackernews/hackernews_format_sample.jsonl`. Hacker News rows keep both the HN discussion URL and the linked source URL, plus attention metadata such as `hn_points` and `hn_num_comments`.
-
-To ingest Hacker News into MongoDB, run it separately:
+Optional providers can be refreshed separately when more coverage is needed.
+They are not required for the fast offline review path.
 
 ```bash
 python -m src.ingest_news --hackernews-only --query semiconductor --start-date 2022-01-01 --end-date today --max-records-per-window 100
-python -m src.preprocess
-```
-
-Hacker News itself usually only provides a title and a linked source URL. To fetch
-article text from those linked URLs in small batches, run:
-
-```bash
 python -m src.enrich_hackernews_links --limit 25
-python -m src.preprocess
-```
-
-This stores `linked_content`, `linked_content_char_count`, `linked_fetch_status`,
-and related fetch metadata on the HN rows. During preprocessing, HN rows prefer
-`linked_content` over the short HN title when available.
-
-To test whether New York Times API output fits the project news schema before enabling it in the full pipeline, add `NYT_API_KEY` to `.env` and run a small smoke test:
-
-```bash
-python -m src.news_providers.nyt --start-date 2025-01-01 --end-date 2025-01-31 --query-mode strict --pages 1 --max-records 10
-```
-
-This does not write to MongoDB. It writes a mapped sample to `artifacts/nyt/nyt_format_sample.jsonl` and reports missing fields or parsing issues.
-
-To ingest NYT snippets into MongoDB as a breadth signal, run it separately with a simple query. NYT Article Search returns short abstracts/snippets rather than full article bodies, so these rows should be treated as breadth/coverage data:
-
-```bash
 python -m src.ingest_news --nyt-only --query semiconductor --start-date 2022-01-01 --end-date today --max-records-per-window 10
-python -m src.preprocess
-```
-
-To test Reuters Business and Financial News through RapidAPI, add `RAPIDAPI_REUTERS_KEY` to `.env` and run:
-
-```bash
-python -m src.news_providers.reuters_rapidapi --start-date 2025-01-01 --end-date 2025-01-31 --keyword semiconductor --pages 1 --max-records 10
-```
-
-This does not write to MongoDB. It writes normalized rows to `artifacts/reuters/reuters_format_sample.jsonl` and the raw API records to `artifacts/reuters/reuters_raw_sample.jsonl`, so you can inspect whether Reuters returns enough article text for AI enrichment. The Reuters tester applies the same relevance filters as the ingestion pipeline by default. Add `--no-relevance-filter` if you want to inspect everything the API returned.
-
-To ingest Reuters into MongoDB, run it as a separate newest-first backfill. The config uses `newest_first: true`, three-month request windows, targeted chip keywords, relevance filters, and `max_requests_per_run` to avoid spending the whole RapidAPI quota by accident:
-
-```bash
 python -m src.ingest_news --reuters-only --start-date 2022-01-01 --end-date today --max-records-per-window 20
 python -m src.preprocess
 ```
+
+Provider smoke tests are available through the individual provider modules if
+you need to inspect raw API output before ingestion. Those tests write ignored
+local files under `artifacts/hackernews/`, `artifacts/nyt/`, and
+`artifacts/reuters/`.
 
 If the Reuters RapidAPI host differs from the default, set it in `.env`:
 

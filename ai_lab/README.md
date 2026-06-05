@@ -30,6 +30,9 @@ It is ignored by Git because `inputs/` contains article text and runtime output.
 If the folder is shared separately, examiners can inspect the AI labels and logs
 without needing MongoDB Atlas or API keys.
 
+See `OFFLINE_BUNDLE.md` for the archive checksum and external download-link
+placeholder.
+
 To import that finished bundle into MongoDB locally:
 
 ```bash

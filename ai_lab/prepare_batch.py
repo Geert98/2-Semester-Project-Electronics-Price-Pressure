@@ -5,7 +5,7 @@ import json
 import shutil
 from pathlib import Path
 
-from ai_lab.export_news import export_news_for_ai_lab
+from ai_lab._export_news import export_news_for_ai_lab
 from src.utils import load_config, setup_env
 
 
