@@ -50,6 +50,7 @@ def predict_latest(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     pd.DataFrame
         A one-row DataFrame containing:
         - month
+        - feature_month
         - predicted_next_month_pressure
         - proba_low
         - proba_medium
@@ -60,12 +61,16 @@ def predict_latest(config_path: str = "configs/config.yaml") -> pd.DataFrame:
 
     # Define paths for the model-ready feature table, trained model artifacts,
     # and output prediction artifact.
-    input_path = Path(config["paths"]["processed_dir"]) / "model_table.csv"
+    processed_dir = Path(config["paths"]["processed_dir"])
+    prediction_input_path = processed_dir / "prediction_table.csv"
+    training_input_path = processed_dir / "model_table.csv"
     model_path = Path(config["paths"]["model_dir"]) / "price_pressure_model.joblib"
     features_path = Path(config["paths"]["model_dir"]) / "feature_columns.joblib"
     output_path = Path(config["paths"]["predictions_dir"]) / "latest_prediction.csv"
 
-    # Load the full feature table produced during feature engineering.
+    # Load the scoring table produced during feature engineering. It keeps the
+    # latest feature row even when the next-month target is not known yet.
+    input_path = prediction_input_path if prediction_input_path.exists() else training_input_path
     df = pd.read_csv(input_path)
 
     # Parse the month column and sort chronologically to ensure the latest row
@@ -104,10 +109,15 @@ def predict_latest(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     for cls, prob in zip(class_names, predicted_proba):
         proba_map[cls] = float(prob)
 
-    # Build the final one-row prediction DataFrame.
+    feature_month = latest_row["month"].iloc[0]
+    predicted_month = feature_month + pd.DateOffset(months=1)
+
+    # Build the final one-row prediction DataFrame. The month field is the
+    # predicted month; feature_month documents which source row was scored.
     result = pd.DataFrame(
         {
-            "month": [latest_row["month"].iloc[0].date().isoformat()],
+            "month": [predicted_month.date().isoformat()],
+            "feature_month": [feature_month.date().isoformat()],
             "predicted_next_month_pressure": [predicted_class],
             "proba_low": [proba_map["low"]],
             "proba_medium": [proba_map["medium"]],

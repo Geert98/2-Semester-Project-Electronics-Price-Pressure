@@ -34,8 +34,11 @@ storage:
 news:
   use_gdelt: false
   use_guardian: true
+  use_hackernews: false
   use_newsapi: true
   use_newsdata: false
+  use_nyt: false
+  use_reuters: false
   use_webzio: false
   start_date: "1998-01-01"
   end_date: today
@@ -55,6 +58,29 @@ news:
     show_fields: bodyText,thumbnail
     min_request_interval_seconds: 1.2
     max_pages_per_window: 3
+  hackernews:
+    endpoint: https://hn.algolia.com/api/v1/search_by_date
+    query: semiconductor
+    queries:
+      - semiconductor
+    tags: story
+    newest_first: true
+    months_per_request: 3
+    max_pages_per_window: 1
+    hits_per_page: 100
+    max_requests_per_run: 100
+    min_request_interval_seconds: 0.5
+    require_url: true
+    require_title: true
+    min_points: 0
+    high_attention_min_points: 100
+    high_attention_min_comments: 50
+  hackernews_link_fetch:
+    timeout_seconds: 20
+    min_request_interval_seconds: 1.0
+    max_response_bytes: 2000000
+    max_chars: 15000
+    min_text_chars: 300
   newsapi:
     api_key_env: NEWSAPI_KEY
     endpoint: everything
@@ -68,6 +94,82 @@ news:
     endpoint: archive
     language: en
     min_request_interval_seconds: 31
+  nyt:
+    api_key_env: NYT_API_KEY
+    sort: newest
+    newest_first: true
+    min_request_interval_seconds: 13
+    max_pages_per_window: 1
+    max_requests_per_run: 100
+  reuters:
+    api_key_env: RAPIDAPI_REUTERS_KEY
+    host_env: RAPIDAPI_REUTERS_HOST
+    host: reuters-business-and-financial-news.p.rapidapi.com
+    endpoint_mode: keyword_date_range
+    keyword: semiconductor
+    keywords:
+      - semiconductor
+    newest_first: true
+    min_request_interval_seconds: 1.0
+    max_pages_per_window: 1
+    months_per_request: 3
+    max_requests_per_run: 30
+    page_size: 20
+    filter_relevance: true
+    min_content_chars: 500
+    require_pressure_term: true
+    required_terms:
+      - semiconductor
+      - semiconductors
+      - microchip
+      - microchips
+      - "computer chip"
+      - "computer chips"
+      - "AI chip"
+      - "AI chips"
+      - "chip industry"
+      - chipmaker
+      - chipmakers
+      - "memory chip"
+      - "memory chips"
+      - DRAM
+      - NAND
+      - HBM
+      - "high bandwidth memory"
+      - "integrated circuit"
+      - "integrated circuits"
+    pressure_terms:
+      - price
+      - prices
+      - shortage
+      - shortages
+      - supply
+      - demand
+      - tariff
+      - tariffs
+      - "export control"
+      - "export controls"
+      - restriction
+      - restrictions
+      - inventory
+      - inventories
+      - oversupply
+      - production
+      - capacity
+      - manufacturing
+      - regulation
+      - regulations
+    exclude_terms:
+      - "potato chip"
+      - "potato chips"
+      - "poker chip"
+      - "poker chips"
+      - "casino chip"
+      - "casino chips"
+      - "fish and chips"
+      - "chocolate chip"
+      - "blue chip"
+      - "blue-chip"
   webzio:
     api_key_env: WEBZIO_API_KEY
     endpoint: newsApiLite
@@ -90,7 +192,7 @@ news:
 ai_enrichment:
   enabled: false
   backend: groq
-  model: openai/gpt-oss-20b
+  model:
   api_key_env: GROQ_API_KEY
   max_articles_per_run: 3
   max_chars_per_article: 3000
@@ -107,11 +209,15 @@ ai_lab_export:
   batch_size: 100
   max_chars: 12000
   prefilter: true
-  default_model: Qwen/Qwen2.5-7B-Instruct
-  default_gpus: 1
-  default_max_model_len: 8192
+  default_model: $HOME/models/Qwen2.5-32B-Instruct
+  default_gpus: 4
+  default_max_model_len: 4096
+  judge_model: $HOME/models/Mistral-Small-24B-Instruct-2501
+  judge_sample_size: 500
 
 features:
+  use_legacy_text_features: false
+  use_vader_sentiment: false
   keywords:
     - semiconductor
     - supply chain
@@ -130,9 +236,24 @@ target:
   high_quantile: 0.67
 
 model:
-  test_size_months: 12
+  test_size_months: 36
+  validation_size_months: 36
   random_state: 42
+  feature_sets:
+    - baseline
+    - ai_compact
+    - baseline_with_persistence
+    - ai_compact_with_persistence
   candidates:
     - logistic_regression
-    - gradient_boosting
+    - xgboost
   selection_metric: macro_f1
+  recent_period_experiment:
+    start_years:
+      - 2020
+      - 2021
+      - 2022
+      - 2023
+    validation_size_months: 12
+    test_size_months: 12
+    min_train_months: 24

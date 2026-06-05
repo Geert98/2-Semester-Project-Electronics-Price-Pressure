@@ -6,8 +6,11 @@ import pandas as pd
 
 from src.news_providers.gdelt import append_gdelt_rows
 from src.news_providers.guardian import append_guardian_rows
+from src.news_providers.hackernews import append_hackernews_rows
 from src.news_providers.newsapi import append_newsapi_rows
 from src.news_providers.newsdata import append_newsdata_rows
+from src.news_providers.nyt import append_nyt_rows
+from src.news_providers.reuters_rapidapi import append_reuters_rows
 from src.news_providers.webzio import append_webzio_rows
 
 
@@ -57,6 +60,22 @@ def build_provider_runners(
             )
         )
 
+    if bool(news_cfg.get("use_hackernews", False)):
+        runners.append(
+            (
+                "hackernews",
+                lambda rows: append_hackernews_rows(
+                    rows=rows,
+                    news_cfg=news_cfg,
+                    query=query,
+                    max_records=max_records,
+                    windows=windows,
+                    max_retries=max_retries,
+                    retry_base_sleep=retry_base_sleep,
+                ),
+            )
+        )
+
     if bool(news_cfg.get("use_newsapi", False)):
         runners.append(
             (
@@ -77,6 +96,38 @@ def build_provider_runners(
             (
                 "newsdata",
                 lambda rows: append_newsdata_rows(
+                    rows=rows,
+                    news_cfg=news_cfg,
+                    query=query,
+                    max_records=max_records,
+                    windows=windows,
+                    max_retries=max_retries,
+                    retry_base_sleep=retry_base_sleep,
+                ),
+            )
+        )
+
+    if bool(news_cfg.get("use_nyt", False)):
+        runners.append(
+            (
+                "nyt",
+                lambda rows: append_nyt_rows(
+                    rows=rows,
+                    news_cfg=news_cfg,
+                    query=query,
+                    max_records=max_records,
+                    windows=windows,
+                    max_retries=max_retries,
+                    retry_base_sleep=retry_base_sleep,
+                ),
+            )
+        )
+
+    if bool(news_cfg.get("use_reuters", False)):
+        runners.append(
+            (
+                "reuters_rapidapi",
+                lambda rows: append_reuters_rows(
                     rows=rows,
                     news_cfg=news_cfg,
                     query=query,

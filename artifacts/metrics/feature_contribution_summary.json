@@ -1,0 +1,12 @@
+{
+  "input_path": "data/processed/model_table.csv",
+  "importance_path": "artifacts/metrics/feature_permutation_importance.csv",
+  "group_importance_path": "artifacts/metrics/feature_group_importance.csv",
+  "n_rows_total": 339,
+  "n_rows_train": 303,
+  "n_rows_test": 36,
+  "test_start_month": "2023-04-01",
+  "test_end_month": "2026-03-01",
+  "n_repeats": 30,
+  "scoring": "macro_f1"
+}

@@ -1,2 +1,2 @@
-month,predicted_next_month_pressure,proba_low,proba_medium,proba_high
-2026-03-01,medium,0.05324574282888839,0.5620895684716762,0.38466468869943543
+month,feature_month,predicted_next_month_pressure,proba_low,proba_medium,proba_high
+2026-05-01,2026-04-01,medium,0.0008764307565523095,0.9763022498437229,0.02282131939972478

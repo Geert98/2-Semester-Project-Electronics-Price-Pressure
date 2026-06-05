@@ -23,6 +23,7 @@ SCHEMA_KEYS = [
 ]
 
 PROMPT_VERSION = "v2"
+EMPTY_MODEL_OUTPUT = "<empty model output>"
 
 GUIDED_JSON_SCHEMA = {
     "type": "object",
@@ -68,6 +69,36 @@ def _prompt(record: dict) -> str:
         "- 'New chip fabs increase supply and inventories rise' => relevant, downward, oversupply.\n"
         "- 'Fish and chips restaurant opens' => not relevant.\n"
         "- 'Microchipped mouthguards used in rugby' => not relevant.\n\n"
+        f"Title: {record.get('title', '')}\n"
+        f"Source: {record.get('source', '')}\n"
+        f"Published at: {record.get('published_at', '')}\n"
+        f"Article text:\n{record.get('text', '')}"
+    )
+
+
+def _retry_prompt(record: dict, previous_output: str, previous_error: str) -> str:
+    raw_output = previous_output.strip() or EMPTY_MODEL_OUTPUT
+    return (
+        "The previous classification attempt did not return parseable JSON.\n"
+        "Classify the article again and return one compact JSON object only.\n"
+        "Do not use markdown. Do not explain outside JSON. The first character must be { and the last character must be }.\n"
+        "Required JSON keys: "
+        + ", ".join(SCHEMA_KEYS)
+        + ".\n"
+        "Allowed values:\n"
+        "- is_relevant: true or false.\n"
+        "- relevance_score: number from 0 to 1.\n"
+        "- sentiment_score: number from -1 to 1.\n"
+        "- price_pressure_direction: upward, downward, or neutral.\n"
+        "- price_pressure_strength: integer from 0 to 5.\n"
+        "- primary_topic: shortage, tariff, demand, supply_chain, export_controls, oversupply, or other.\n"
+        "- reason_short: short string.\n\n"
+        "If the article is not clearly about semiconductor/electronics price pressure, return:\n"
+        '{"is_relevant":false,"relevance_score":0,"sentiment_score":0,'
+        '"price_pressure_direction":"neutral","price_pressure_strength":0,'
+        '"primary_topic":"other","reason_short":"Not directly related to semiconductor or electronics price pressure."}\n\n'
+        f"Previous parser error: {previous_error}\n"
+        f"Previous model output: {raw_output[:1000]}\n\n"
         f"Title: {record.get('title', '')}\n"
         f"Source: {record.get('source', '')}\n"
         f"Published at: {record.get('published_at', '')}\n"
@@ -168,7 +199,7 @@ def _build_llm(
     gpu_memory_utilization: float,
     tensor_parallel_size: int,
     trust_remote_code: bool,
-) -> tuple[LLM, SamplingParams]:
+) -> tuple[LLM, SamplingParams, SamplingParams]:
     os.environ["HUGGING_FACE_HUB_TOKEN"] = os.getenv("HF_TOKEN", "")
 
     llm_kwargs = {
@@ -188,13 +219,18 @@ def _build_llm(
         max_tokens=max_tokens,
         guided_decoding=guided_decoding_params,
     )
-    return llm, sampling_params
+    fallback_sampling_params = SamplingParams(
+        temperature=0,
+        max_tokens=max_tokens,
+    )
+    return llm, sampling_params, fallback_sampling_params
 
 
 def _write_record(dst, source_record: dict, parsed: dict, model: str) -> None:
     output = {
         "url": source_record.get("url"),
         "title": source_record.get("title"),
+        "provider": source_record.get("provider"),
         "source": source_record.get("source"),
         "published_at": source_record.get("published_at"),
         "month": source_record.get("month"),
@@ -217,6 +253,7 @@ def _enrich_records(
     model: str,
     llm: LLM,
     sampling_params: SamplingParams,
+    fallback_sampling_params: SamplingParams,
 ) -> tuple[int, int, int]:
     conversations = [
         [
@@ -252,21 +289,43 @@ def _enrich_records(
                 success_count += 1
                 print(f"OK: {title}", flush=True)
             except Exception as exc:
-                failure_count += 1
-                failed_dst.write(
-                    json.dumps(
-                        {
-                            "url": record.get("url"),
-                            "title": record.get("title"),
-                            "error": str(exc),
-                            "raw_model_output": text,
-                        },
-                        ensure_ascii=True,
+                retry_text = ""
+                retry_conversation = [
+                    {
+                        "role": "system",
+                        "content": "You are a precise data labeling assistant. Return valid JSON only.",
+                    },
+                    {"role": "user", "content": _retry_prompt(record, text, str(exc))},
+                ]
+                try:
+                    retry_outputs = llm.chat(
+                        [retry_conversation],
+                        sampling_params=fallback_sampling_params,
+                        use_tqdm=False,
                     )
-                    + "\n"
-                )
-                failed_dst.flush()
-                print(f"Failed: {title} ({exc})", flush=True)
+                    retry_text = retry_outputs[0].outputs[0].text
+                    parsed = _json_from_text(retry_text)
+                    _write_record(dst, record, parsed, model)
+                    success_count += 1
+                    print(f"OK after retry: {title}", flush=True)
+                except Exception as retry_exc:
+                    failure_count += 1
+                    failed_dst.write(
+                        json.dumps(
+                            {
+                                "url": record.get("url"),
+                                "title": record.get("title"),
+                                "error": str(exc),
+                                "raw_model_output": text,
+                                "retry_error": str(retry_exc),
+                                "retry_raw_model_output": retry_text,
+                            },
+                            ensure_ascii=True,
+                        )
+                        + "\n"
+                    )
+                    failed_dst.flush()
+                    print(f"Failed: {title} ({exc}; retry: {retry_exc})", flush=True)
 
     print(
         f"Finished {batch_label}. success={success_count}, failures={failure_count}",
@@ -287,7 +346,7 @@ def enrich_file(
     trust_remote_code: bool,
 ) -> None:
     records = _load_records(input_path)
-    llm, sampling_params = _build_llm(
+    llm, sampling_params, fallback_sampling_params = _build_llm(
         model=model,
         max_tokens=max_tokens,
         max_model_len=max_model_len,
@@ -303,6 +362,7 @@ def enrich_file(
         model=model,
         llm=llm,
         sampling_params=sampling_params,
+        fallback_sampling_params=fallback_sampling_params,
     )
     print(f"Finished enrichment. success={success_count}, failures={failure_count}", flush=True)
     if success_count == 0 and records:
@@ -330,7 +390,7 @@ def enrich_directory(
     if not input_files:
         raise FileNotFoundError(f"No batch input files found in {input_dir}")
 
-    llm, sampling_params = _build_llm(
+    llm, sampling_params, fallback_sampling_params = _build_llm(
         model=model,
         max_tokens=max_tokens,
         max_model_len=max_model_len,
@@ -354,6 +414,7 @@ def enrich_directory(
             model=model,
             llm=llm,
             sampling_params=sampling_params,
+            fallback_sampling_params=fallback_sampling_params,
         )
         total_records += record_count
         total_success += success_count
@@ -374,7 +435,7 @@ def main() -> None:
     parser.add_argument("--output", default="news_enriched.jsonl")
     parser.add_argument("--output-dir", default="results")
     parser.add_argument("--failed-output", default="failed_records.jsonl")
-    parser.add_argument("--model", default=os.getenv("AI_LAB_MODEL", "Qwen/Qwen2.5-7B-Instruct"))
+    parser.add_argument("--model", default=os.getenv("AI_LAB_MODEL", "Qwen/Qwen2.5-32B-Instruct"))
     parser.add_argument("--max-tokens", type=int, default=300)
     parser.add_argument("--max-model-len", type=int, default=int(os.getenv("AI_LAB_MAX_MODEL_LEN", "8192")))
     parser.add_argument("--gpu-memory-utilization", type=float, default=float(os.getenv("AI_LAB_GPU_MEMORY_UTILIZATION", "0.85")))

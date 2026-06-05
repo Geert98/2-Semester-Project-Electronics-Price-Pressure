@@ -92,7 +92,12 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
     # YYYYMMDDTHHMMSSZ
     #
     # errors="coerce" converts invalid values to NaT instead of crashing.
-    df["published_at"] = pd.to_datetime(df["seen_date"], errors="coerce", utc=True)
+    df["published_at"] = pd.to_datetime(
+        df["seen_date"],
+        errors="coerce",
+        format="mixed",
+        utc=True,
+    )
 
     # Remove timezone information so downstream handling is simpler.
     df["published_at"] = df["published_at"].dt.tz_convert(None)
@@ -113,8 +118,19 @@ def preprocess_news(config_path: str = "configs/config.yaml") -> pd.DataFrame:
 
     # Create the cleaned text field used later for keyword counts and sentiment analysis.
     # Prefer the article body when it is available, and fall back to the title.
-    # The shared cleaner strips Guardian HTML while keeping visible text and link text.
+    # For Hacker News, use fetched linked-page text when available; HN itself only
+    # contains a short title/discussion stub, while linked_url often points to the
+    # actual primary/news source.
     text_source = df["content"].where(df["content"].str.strip() != "", df["title"])
+    if "linked_content" in df.columns:
+        linked_content = df["linked_content"].fillna("")
+        provider = df.get("provider", pd.Series("", index=df.index)).fillna("")
+        has_linked_content = linked_content.str.strip() != ""
+        is_hackernews = provider == "hackernews"
+        text_source = text_source.mask(
+            is_hackernews & has_linked_content,
+            df["title"].fillna("") + " " + linked_content,
+        )
     df["clean_text"] = text_source.apply(clean_news_text)
 
     # Create a monthly timestamp key for later aggregation in feature engineering.

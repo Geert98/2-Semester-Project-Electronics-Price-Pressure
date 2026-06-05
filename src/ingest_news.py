@@ -20,7 +20,7 @@ import pandas as pd
 from src.news_providers.common import month_windows
 from src.news_providers.registry import build_provider_runners
 from src.storage import upsert_dataframe_to_mongo
-from src.utils import load_config
+from src.utils import load_config, setup_env
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +52,9 @@ def _news_config_with_overrides(
     max_records_per_window: int | None,
     guardian_max_pages: int | None,
     guardian_only: bool,
+    hackernews_only: bool,
+    nyt_only: bool,
+    reuters_only: bool,
 ) -> dict:
     """
     Copy the news config and apply safe runtime overrides.
@@ -68,12 +71,28 @@ def _news_config_with_overrides(
     if guardian_max_pages is not None:
         resolved["guardian"]["max_pages_per_window"] = guardian_max_pages
 
+    if guardian_only or hackernews_only or nyt_only or reuters_only:
+        provider_flags = [
+            "use_gdelt",
+            "use_guardian",
+            "use_hackernews",
+            "use_newsapi",
+            "use_newsdata",
+            "use_nyt",
+            "use_reuters",
+            "use_webzio",
+        ]
+        for provider_flag in provider_flags:
+            resolved[provider_flag] = False
+
     if guardian_only:
         resolved["use_guardian"] = True
-        resolved["use_gdelt"] = False
-        resolved["use_newsapi"] = False
-        resolved["use_newsdata"] = False
-        resolved["use_webzio"] = False
+    if hackernews_only:
+        resolved["use_hackernews"] = True
+    if nyt_only:
+        resolved["use_nyt"] = True
+    if reuters_only:
+        resolved["use_reuters"] = True
 
     return resolved
 
@@ -87,7 +106,11 @@ def ingest_news(
     max_records_per_window: int | None = None,
     guardian_max_pages: int | None = None,
     guardian_only: bool = False,
+    hackernews_only: bool = False,
+    nyt_only: bool = False,
+    reuters_only: bool = False,
 ) -> pd.DataFrame:
+    setup_env()
     config = load_config(config_path)
     news_cfg = _news_config_with_overrides(
         news_cfg=config["news"],
@@ -96,6 +119,9 @@ def ingest_news(
         max_records_per_window=max_records_per_window,
         guardian_max_pages=guardian_max_pages,
         guardian_only=guardian_only,
+        hackernews_only=hackernews_only,
+        nyt_only=nyt_only,
+        reuters_only=reuters_only,
     )
 
     query = _select_news_query(news_cfg, query=query, query_mode=query_mode)
@@ -129,7 +155,8 @@ def ingest_news(
     if not provider_runners:
         raise ValueError(
             "At least one news provider must be enabled: "
-            "use_gdelt, use_guardian, use_newsapi, use_newsdata, or use_webzio."
+            "use_gdelt, use_guardian, use_hackernews, use_newsapi, use_newsdata, "
+            "use_nyt, use_reuters, or use_webzio."
         )
 
     rows: list[dict] = []
@@ -152,7 +179,15 @@ def ingest_news(
         "source_country",
     ]
 
-    df = pd.DataFrame(rows, columns=expected_columns)
+    df = pd.DataFrame(rows)
+    if df.empty:
+        df = pd.DataFrame(columns=expected_columns)
+    else:
+        for column in expected_columns:
+            if column not in df.columns:
+                df[column] = None
+        extra_columns = [column for column in df.columns if column not in expected_columns]
+        df = df[expected_columns + extra_columns]
 
     raw_collection = config["storage"]["mongo"]["test_news_collection"]
     changed_count = upsert_dataframe_to_mongo(df, config, raw_collection, key_columns=["url"])
@@ -192,6 +227,21 @@ if __name__ == "__main__":
         action="store_true",
         help="Use only Guardian for historical backfills.",
     )
+    parser.add_argument(
+        "--hackernews-only",
+        action="store_true",
+        help="Use only Hacker News Algolia search for a tech-attention backfill.",
+    )
+    parser.add_argument(
+        "--nyt-only",
+        action="store_true",
+        help="Use only New York Times Article Search for a focused test/backfill.",
+    )
+    parser.add_argument(
+        "--reuters-only",
+        action="store_true",
+        help="Use only Reuters RapidAPI for a focused test/backfill.",
+    )
     args = parser.parse_args()
 
     ingest_news(
@@ -203,4 +253,7 @@ if __name__ == "__main__":
         max_records_per_window=args.max_records_per_window,
         guardian_max_pages=args.guardian_max_pages,
         guardian_only=args.guardian_only,
+        hackernews_only=args.hackernews_only,
+        nyt_only=args.nyt_only,
+        reuters_only=args.reuters_only,
     )

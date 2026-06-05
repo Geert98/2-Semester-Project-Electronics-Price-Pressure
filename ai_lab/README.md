@@ -38,7 +38,8 @@ sbatch run_ai_lab.sh qwen25-32b
 ```
 
 This runs all batch files in `inputs/` with one model load and writes one result
-file per batch.
+file per batch. By default, the same job then runs a separate Mistral judge step on
+a quality-control sample of the enrichment labels.
 
 Output lands in:
 
@@ -47,6 +48,8 @@ logs/out/
 logs/err/
 results/news_enriched_00000.jsonl
 results/failed_records_00000.jsonl
+results/news_judged_00000.jsonl
+results/failed_judgements_00000.jsonl
 ```
 
 ## Import Results
@@ -63,25 +66,31 @@ into MongoDB. For older single-file runs, it falls back to
 
 ## Models
 
-Default model:
+Stable enrichment model:
 
 ```text
-Qwen/Qwen2.5-7B-Instruct
+$HOME/models/Qwen2.5-32B-Instruct
 ```
 
-This is the model that has already loaded successfully on one L4 GPU.
+This is downloaded from:
 
-For a larger model that should be compatible with the current AI-LAB vLLM
-container, use Qwen 2.5 32B:
-
-```bash
-sbatch run_ai_lab.sh qwen25-32b
+```text
+Qwen/Qwen2.5-32B-Instruct
 ```
 
-If it is not already in `$HOME/models/Qwen2.5-32B-Instruct`, the Slurm job
-creates the model folder, downloads the model, and then runs enrichment.
+Judge model:
 
-Before the first large-model run, create a private env file on AI-LAB:
+```text
+$HOME/models/Mistral-Small-24B-Instruct-2501
+```
+
+This is downloaded from:
+
+```text
+mistralai/Mistral-Small-24B-Instruct-2501
+```
+
+Before the first run, create a private env file on AI-LAB:
 
 ```bash
 nano ~/.ai_lab_env
@@ -94,23 +103,34 @@ Put this in the file:
 HF_TOKEN=hf_your_token_here
 ```
 
+Do not put this env file inside the project folder or upload bundle.
+
+Then run:
+
+```bash
+sbatch run_ai_lab.sh qwen25-32b
+```
+
 You can also put optional defaults in the same file:
 
 ```bash
 AI_LAB_QWEN25_32B_DIR=$HOME/models/Qwen2.5-32B-Instruct
+AI_LAB_MISTRAL_JUDGE_DIR=$HOME/models/Mistral-Small-24B-Instruct-2501
 AI_LAB_GPUS=4
 AI_LAB_MAX_MODEL_LEN=4096
+AI_LAB_JUDGE_SAMPLE_SIZE=500
 ```
 
-Do not put this env file inside the project folder or upload bundle.
-
-Qwen 3.6 currently fails on the AI-LAB `vllm-openai_latest.sif` container
-because the container's Transformers/vLLM stack does not recognize the
-`qwen3_5` architecture. It needs a newer vLLM/Transformers container. If AI-LAB
-provides one later, try:
+To skip the judge step:
 
 ```bash
-sbatch run_ai_lab.sh qwen36
+AI_LAB_RUN_JUDGE=false sbatch run_ai_lab.sh qwen25-32b
+```
+
+To run only the judge step on existing `results/news_enriched_*.jsonl` files:
+
+```bash
+sbatch run_ai_lab.sh judge-only
 ```
 
 Check logs with:
@@ -122,10 +142,10 @@ tail -f logs/out/news-enrichment-*.out
 tail -f logs/err/news-enrichment-*.err
 ```
 
-If you only want to download the model without running enrichment:
+If you only want to download the judge model without running enrichment:
 
 ```bash
-sbatch run_ai_lab.sh qwen36-download
+sbatch run_ai_lab.sh judge-download
 ```
 
 If it runs out of memory, try more GPUs if AI-LAB allows it:

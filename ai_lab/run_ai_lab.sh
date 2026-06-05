@@ -9,6 +9,7 @@
 set -euo pipefail
 
 MODE="${1:-run}"
+REQUESTED_MODE="$MODE"
 DOWNLOAD_MODEL_IF_MISSING=false
 AI_LAB_ENV_FILE="${AI_LAB_ENV_FILE:-$HOME/.ai_lab_env}"
 
@@ -22,10 +23,10 @@ fi
 usage() {
   cat <<'EOF'
 Usage:
-  ./run_ai_lab.sh                 Run enrichment with the default Qwen 2.5 model
-  ./run_ai_lab.sh qwen25-32b      Download Qwen 2.5 32B if needed, then run enrichment
-  ./run_ai_lab.sh qwen36          Try Qwen 3.6; requires a newer vLLM/Transformers container
-  ./run_ai_lab.sh qwen36-download Only download Qwen 3.6 to persistent AI-LAB storage
+  ./run_ai_lab.sh                 Run enrichment with Qwen 2.5 32B, then Mistral judge
+  ./run_ai_lab.sh qwen25-32b      Run enrichment with Qwen 2.5 32B, then Mistral judge
+  ./run_ai_lab.sh judge-only      Run Mistral judge on existing enrichment results
+  ./run_ai_lab.sh judge-download  Only download the Mistral judge model
   ./run_ai_lab.sh help            Show this help
 
 You can run this script directly, or submit it with sbatch.
@@ -34,14 +35,15 @@ first, save it in ~/.ai_lab_env, or save it in ~/.cache/huggingface/token.
 
 Advanced overrides:
   AI_LAB_MODEL=/path/or/hf-id ./run_ai_lab.sh
+  AI_LAB_RUN_JUDGE=false ./run_ai_lab.sh qwen25-32b
   AI_LAB_GPUS=8 ./run_ai_lab.sh qwen25-32b
 EOF
 }
 
-QWEN36_REPO="${AI_LAB_QWEN36_REPO:-Qwen/Qwen3.6-27B}"
-QWEN36_DIR="${AI_LAB_QWEN36_DIR:-$HOME/models/Qwen3.6-27B}"
 QWEN25_32B_REPO="${AI_LAB_QWEN25_32B_REPO:-Qwen/Qwen2.5-32B-Instruct}"
 QWEN25_32B_DIR="${AI_LAB_QWEN25_32B_DIR:-$HOME/models/Qwen2.5-32B-Instruct}"
+MISTRAL_JUDGE_REPO="${AI_LAB_MISTRAL_JUDGE_REPO:-mistralai/Mistral-Small-24B-Instruct-2501}"
+MISTRAL_JUDGE_DIR="${AI_LAB_MISTRAL_JUDGE_DIR:-$HOME/models/Mistral-Small-24B-Instruct-2501}"
 HF_TOKEN_FILE="${AI_LAB_HF_TOKEN_FILE:-$HOME/.cache/huggingface/token}"
 AI_LAB_USE_CONTAINER="${AI_LAB_USE_CONTAINER:-auto}"
 AI_LAB_RUNTIME=""
@@ -127,51 +129,67 @@ download_model() {
   echo "=== Model download finished ==="
 }
 
+download_model_if_needed() {
+  local repo="$1"
+  local target_dir="$2"
+  local label="$3"
+
+  if model_ready "$target_dir"; then
+    echo "$label model is already available: $target_dir"
+    return
+  fi
+
+  echo "$label model is missing. Downloading before continuing."
+  AI_LAB_DOWNLOAD_REPO="$repo" AI_LAB_DOWNLOAD_DIR="$target_dir" download_model
+}
+
 export AI_LAB_GPU_MEMORY_UTILIZATION="${AI_LAB_GPU_MEMORY_UTILIZATION:-0.85}"
 export AI_LAB_VLLM_CONTAINER="${AI_LAB_VLLM_CONTAINER:-/ceph/container/vllm-openai_latest.sif}"
 export AI_LAB_TIME="${AI_LAB_TIME:-02:00:00}"
 export AI_LAB_MEM="${AI_LAB_MEM:-40G}"
 export AI_LAB_DOWNLOAD_TIME="${AI_LAB_DOWNLOAD_TIME:-04:00:00}"
 export AI_LAB_DOWNLOAD_MEM="${AI_LAB_DOWNLOAD_MEM:-16G}"
-export AI_LAB_TRUST_REMOTE_CODE="${AI_LAB_TRUST_REMOTE_CODE:-false}"
+AI_LAB_TRUST_REMOTE_CODE="${AI_LAB_TRUST_REMOTE_CODE:-}"
+export AI_LAB_JUDGE_MODEL="${AI_LAB_JUDGE_MODEL:-$MISTRAL_JUDGE_DIR}"
+export AI_LAB_JUDGE_REPO="${AI_LAB_JUDGE_REPO:-$MISTRAL_JUDGE_REPO}"
+export AI_LAB_JUDGE_DIR="${AI_LAB_JUDGE_DIR:-$MISTRAL_JUDGE_DIR}"
+export AI_LAB_JUDGE_SAMPLE_SIZE="${AI_LAB_JUDGE_SAMPLE_SIZE:-500}"
+export AI_LAB_JUDGE_MAX_MODEL_LEN="${AI_LAB_JUDGE_MAX_MODEL_LEN:-4096}"
+export AI_LAB_JUDGE_MAX_TOKENS="${AI_LAB_JUDGE_MAX_TOKENS:-500}"
+export AI_LAB_JUDGE_TRUST_REMOTE_CODE="${AI_LAB_JUDGE_TRUST_REMOTE_CODE:-false}"
+export AI_LAB_JUDGE_TOKENIZER_MODE="${AI_LAB_JUDGE_TOKENIZER_MODE:-mistral}"
+export AI_LAB_JUDGE_CONFIG_FORMAT="${AI_LAB_JUDGE_CONFIG_FORMAT:-mistral}"
+export AI_LAB_JUDGE_LOAD_FORMAT="${AI_LAB_JUDGE_LOAD_FORMAT:-mistral}"
 
 case "$MODE" in
   help|-h|--help)
     usage
     exit 0
     ;;
-  run)
-    export AI_LAB_MODEL="${AI_LAB_MODEL:-Qwen/Qwen2.5-7B-Instruct}"
-    export AI_LAB_GPUS="${AI_LAB_GPUS:-1}"
-    export AI_LAB_MAX_MODEL_LEN="${AI_LAB_MAX_MODEL_LEN:-8192}"
-    ;;
-  qwen25-32b|large)
+  run|qwen25-32b|large)
     export AI_LAB_MODEL="${AI_LAB_MODEL:-$QWEN25_32B_DIR}"
     export AI_LAB_GPUS="${AI_LAB_GPUS:-4}"
     export AI_LAB_MAX_MODEL_LEN="${AI_LAB_MAX_MODEL_LEN:-4096}"
     export AI_LAB_DOWNLOAD_REPO="${AI_LAB_DOWNLOAD_REPO:-$QWEN25_32B_REPO}"
     export AI_LAB_DOWNLOAD_DIR="${AI_LAB_DOWNLOAD_DIR:-$QWEN25_32B_DIR}"
+    export AI_LAB_RUN_JUDGE="${AI_LAB_RUN_JUDGE:-true}"
     DOWNLOAD_MODEL_IF_MISSING=true
     MODE="run"
     ;;
-  qwen36)
-    export AI_LAB_MODEL="${AI_LAB_MODEL:-$QWEN36_DIR}"
-    export AI_LAB_GPUS="${AI_LAB_GPUS:-4}"
-    export AI_LAB_MAX_MODEL_LEN="${AI_LAB_MAX_MODEL_LEN:-4096}"
-    export AI_LAB_DOWNLOAD_REPO="${AI_LAB_DOWNLOAD_REPO:-$QWEN36_REPO}"
-    export AI_LAB_DOWNLOAD_DIR="${AI_LAB_DOWNLOAD_DIR:-$QWEN36_DIR}"
-    export AI_LAB_TRUST_REMOTE_CODE="${AI_LAB_TRUST_REMOTE_CODE:-true}"
-    DOWNLOAD_MODEL_IF_MISSING=true
-    MODE="run"
-    ;;
-  qwen36-download)
-    export AI_LAB_DOWNLOAD_REPO="${AI_LAB_DOWNLOAD_REPO:-$QWEN36_REPO}"
-    export AI_LAB_DOWNLOAD_DIR="${AI_LAB_DOWNLOAD_DIR:-$QWEN36_DIR}"
+  judge-download)
+    export AI_LAB_DOWNLOAD_REPO="${AI_LAB_DOWNLOAD_REPO:-$AI_LAB_JUDGE_REPO}"
+    export AI_LAB_DOWNLOAD_DIR="${AI_LAB_DOWNLOAD_DIR:-$AI_LAB_JUDGE_DIR}"
     MODE="download-model"
     ;;
+  judge-only)
+    export AI_LAB_RUN_JUDGE=true
+    export AI_LAB_GPUS="${AI_LAB_GPUS:-4}"
+    export AI_LAB_MAX_MODEL_LEN="${AI_LAB_MAX_MODEL_LEN:-4096}"
+    MODE="judge-only"
+    ;;
   download-model)
-    export AI_LAB_DOWNLOAD_REPO="${AI_LAB_DOWNLOAD_REPO:-$QWEN36_REPO}"
-    export AI_LAB_DOWNLOAD_DIR="${AI_LAB_DOWNLOAD_DIR:-$QWEN36_DIR}"
+    export AI_LAB_DOWNLOAD_REPO="${AI_LAB_DOWNLOAD_REPO:-$QWEN25_32B_REPO}"
+    export AI_LAB_DOWNLOAD_DIR="${AI_LAB_DOWNLOAD_DIR:-$QWEN25_32B_DIR}"
     ;;
   *)
     echo "ERROR: Unknown command: $MODE"
@@ -181,9 +199,12 @@ case "$MODE" in
 esac
 
 export AI_LAB_GPUS="${AI_LAB_GPUS:-1}"
-export AI_LAB_MODEL="${AI_LAB_MODEL:-Qwen/Qwen2.5-7B-Instruct}"
+export AI_LAB_MODEL="${AI_LAB_MODEL:-$QWEN25_32B_DIR}"
 export AI_LAB_MAX_MODEL_LEN="${AI_LAB_MAX_MODEL_LEN:-8192}"
+export AI_LAB_TRUST_REMOTE_CODE="${AI_LAB_TRUST_REMOTE_CODE:-false}"
 export AI_LAB_TENSOR_PARALLEL_SIZE="${AI_LAB_TENSOR_PARALLEL_SIZE:-$AI_LAB_GPUS}"
+export AI_LAB_JUDGE_TENSOR_PARALLEL_SIZE="${AI_LAB_JUDGE_TENSOR_PARALLEL_SIZE:-$AI_LAB_TENSOR_PARALLEL_SIZE}"
+export AI_LAB_RUN_JUDGE="${AI_LAB_RUN_JUDGE:-false}"
 
 if [[ -z "${SLURM_JOB_ID:-}" ]]; then
   mkdir -p logs/out logs/err results
@@ -208,13 +229,17 @@ if [[ -z "${SLURM_JOB_ID:-}" ]]; then
     exit 0
   fi
 
-  echo "Submitting AI-LAB enrichment job"
+  if [[ "$MODE" == "judge-only" ]]; then
+    echo "Submitting AI-LAB judge job"
+  else
+    echo "Submitting AI-LAB enrichment job"
+  fi
   echo "Model: $AI_LAB_MODEL"
   echo "GPUs: $AI_LAB_GPUS"
   echo "Max model length: $AI_LAB_MAX_MODEL_LEN"
 
   DEPENDENCY_ARGS=()
-  if [[ "$DOWNLOAD_MODEL_IF_MISSING" == true && "$AI_LAB_MODEL" == "$AI_LAB_DOWNLOAD_DIR" ]] && ! model_ready "$AI_LAB_MODEL"; then
+  if [[ "$MODE" != "judge-only" && "$DOWNLOAD_MODEL_IF_MISSING" == true && "$AI_LAB_MODEL" == "$AI_LAB_DOWNLOAD_DIR" ]] && ! model_ready "$AI_LAB_MODEL"; then
     if [[ -z "${HF_TOKEN:-}" && -t 0 ]]; then
       read -rsp "Hugging Face token: " HF_TOKEN
       echo
@@ -245,7 +270,7 @@ if [[ -z "${SLURM_JOB_ID:-}" ]]; then
     --gres="gpu:$AI_LAB_GPUS" \
     --export=ALL \
     "${DEPENDENCY_ARGS[@]}" \
-    "$0"
+    "$0" "$REQUESTED_MODE"
   exit 0
 fi
 
@@ -286,19 +311,58 @@ if [[ "${#INPUT_FILES[@]}" -eq 0 && ! -f "news_to_enrich.jsonl" ]]; then
   exit 1
 fi
 
+run_judge_step() {
+  echo "=== News enrichment judge step started ==="
+  echo "Judge model: $AI_LAB_JUDGE_MODEL"
+  echo "Judge sample size: $AI_LAB_JUDGE_SAMPLE_SIZE"
+  echo "Judge max model length: $AI_LAB_JUDGE_MAX_MODEL_LEN"
+  echo "Judge tokenizer mode: ${AI_LAB_JUDGE_TOKENIZER_MODE:-auto}"
+  echo "Judge config format: ${AI_LAB_JUDGE_CONFIG_FORMAT:-auto}"
+  echo "Judge load format: ${AI_LAB_JUDGE_LOAD_FORMAT:-auto}"
+
+  if [[ "$AI_LAB_JUDGE_MODEL" == "$AI_LAB_JUDGE_DIR" ]] && ! model_ready "$AI_LAB_JUDGE_MODEL"; then
+    download_model_if_needed "$AI_LAB_JUDGE_REPO" "$AI_LAB_JUDGE_DIR" "Judge"
+  elif [[ "$AI_LAB_JUDGE_MODEL" == /* ]] && ! model_ready "$AI_LAB_JUDGE_MODEL"; then
+    echo "ERROR: Local judge model folder is missing or incomplete: $AI_LAB_JUDGE_MODEL"
+    echo "Expected a config.json in that folder."
+    exit 1
+  fi
+
+  JUDGE_TRUST_REMOTE_CODE_ARGS=()
+  if [[ "$AI_LAB_JUDGE_TRUST_REMOTE_CODE" == "true" ]]; then
+    JUDGE_TRUST_REMOTE_CODE_ARGS=(--trust-remote-code)
+  fi
+  JUDGE_FORMAT_ARGS=()
+  if [[ -n "${AI_LAB_JUDGE_TOKENIZER_MODE:-}" ]]; then
+    JUDGE_FORMAT_ARGS+=(--tokenizer-mode "$AI_LAB_JUDGE_TOKENIZER_MODE")
+  fi
+  if [[ -n "${AI_LAB_JUDGE_CONFIG_FORMAT:-}" ]]; then
+    JUDGE_FORMAT_ARGS+=(--config-format "$AI_LAB_JUDGE_CONFIG_FORMAT")
+  fi
+  if [[ -n "${AI_LAB_JUDGE_LOAD_FORMAT:-}" ]]; then
+    JUDGE_FORMAT_ARGS+=(--load-format "$AI_LAB_JUDGE_LOAD_FORMAT")
+  fi
+
+  run_python \
+    python3 -s judge_enrichment.py \
+      --input-dir "$INPUT_DIR" \
+      --enriched-dir "$RESULTS_DIR" \
+      --output-dir "$RESULTS_DIR" \
+      --model "$AI_LAB_JUDGE_MODEL" \
+      --max-model-len "$AI_LAB_JUDGE_MAX_MODEL_LEN" \
+      --max-tokens "$AI_LAB_JUDGE_MAX_TOKENS" \
+      --tensor-parallel-size "$AI_LAB_JUDGE_TENSOR_PARALLEL_SIZE" \
+      --gpu-memory-utilization "$AI_LAB_GPU_MEMORY_UTILIZATION" \
+      --sample-size "$AI_LAB_JUDGE_SAMPLE_SIZE" \
+      "${JUDGE_FORMAT_ARGS[@]}" \
+      "${JUDGE_TRUST_REMOTE_CODE_ARGS[@]}"
+
+  echo "Judged lines: $(find "$RESULTS_DIR" -maxdepth 1 -name 'news_judged*.jsonl' -exec wc -l {} + 2>/dev/null | tail -n 1 || echo 0)"
+  echo "Failed judgement lines: $(find "$RESULTS_DIR" -maxdepth 1 -name 'failed_judgements*.jsonl' -exec wc -l {} + 2>/dev/null | tail -n 1 || echo 0)"
+  echo "=== News enrichment judge step finished ==="
+}
+
 select_runtime
-
-if [[ "$DOWNLOAD_MODEL_IF_MISSING" == true && "$AI_LAB_MODEL" == "$AI_LAB_DOWNLOAD_DIR" ]] && ! model_ready "$AI_LAB_MODEL"; then
-  echo "Local model is missing. Downloading it in this Slurm job before enrichment."
-  download_model
-elif [[ "$AI_LAB_MODEL" == /* ]] && ! model_ready "$AI_LAB_MODEL"; then
-  echo "ERROR: Local model folder is missing or incomplete: $AI_LAB_MODEL"
-  echo "For a large compatible model, run: sbatch --export=ALL run_ai_lab.sh qwen25-32b"
-  exit 1
-fi
-
-: > results/news_enriched.jsonl
-: > results/failed_records.jsonl
 
 echo "Host GPU visibility:"
 nvidia-smi -L || true
@@ -306,6 +370,23 @@ nvidia-smi -L || true
 echo "Python and CUDA visibility:"
 run_python \
   python3 -s -c "import sys, torch; print(sys.executable); print('cuda_available=', torch.cuda.is_available()); print('cuda_device_count=', torch.cuda.device_count()); [print('cuda_device', i, torch.cuda.get_device_name(i)) for i in range(torch.cuda.device_count())]"
+
+if [[ "$MODE" == "judge-only" ]]; then
+  run_judge_step
+  exit 0
+fi
+
+if [[ "$DOWNLOAD_MODEL_IF_MISSING" == true && "$AI_LAB_MODEL" == "$AI_LAB_DOWNLOAD_DIR" ]] && ! model_ready "$AI_LAB_MODEL"; then
+  echo "Local model is missing. Downloading it in this Slurm job before enrichment."
+  download_model
+elif [[ "$AI_LAB_MODEL" == /* ]] && ! model_ready "$AI_LAB_MODEL"; then
+  echo "ERROR: Local model folder is missing or incomplete: $AI_LAB_MODEL"
+  echo "For the stable fallback model, run: sbatch --export=ALL run_ai_lab.sh qwen25-32b"
+  exit 1
+fi
+
+: > "$RESULTS_DIR/news_enriched.jsonl"
+: > "$RESULTS_DIR/failed_records.jsonl"
 
 TRUST_REMOTE_CODE_ARGS=()
 if [[ "$AI_LAB_TRUST_REMOTE_CODE" == "true" ]]; then
@@ -365,4 +446,11 @@ fi
 
 echo "Output lines: $(find "$RESULTS_DIR" -maxdepth 1 -name 'news_enriched*.jsonl' -exec wc -l {} + 2>/dev/null | tail -n 1 || echo 0)"
 echo "Failed lines: $(find "$RESULTS_DIR" -maxdepth 1 -name 'failed_records*.jsonl' -exec wc -l {} + 2>/dev/null | tail -n 1 || echo 0)"
+
+if [[ "$AI_LAB_RUN_JUDGE" == "true" ]]; then
+  run_judge_step
+else
+  echo "Judge step skipped. Set AI_LAB_RUN_JUDGE=true to run Mistral quality audit."
+fi
+
 echo "=== News enrichment job finished ==="

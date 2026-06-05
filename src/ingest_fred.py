@@ -18,15 +18,48 @@ from __future__ import annotations
 
 import logging
 import io
+import time
 from typing import Any
 
 import pandas as pd
 import requests
 
-from src.storage import get_sqlite_path, save_dataframe_to_sqlite
+from src.storage import get_sqlite_path, load_dataframe_from_sqlite, save_dataframe_to_sqlite
 from src.utils import load_config
 
 logger = logging.getLogger(__name__)
+
+REQUEST_TIMEOUT_SECONDS = 90
+MAX_DOWNLOAD_RETRIES = 3
+RETRY_BASE_SLEEP_SECONDS = 3
+
+
+def _get_with_retries(url: str) -> requests.Response:
+    """
+    Download a URL with a few retries for slow FRED/New York Fed responses.
+    """
+    last_error: Exception | None = None
+    for attempt in range(1, MAX_DOWNLOAD_RETRIES + 1):
+        try:
+            response = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS)
+            response.raise_for_status()
+            return response
+        except requests.RequestException as exc:
+            last_error = exc
+            if attempt == MAX_DOWNLOAD_RETRIES:
+                break
+            sleep_seconds = RETRY_BASE_SLEEP_SECONDS * attempt
+            logger.warning(
+                "Download failed on attempt %s/%s for %s: %s. Retrying in %ss.",
+                attempt,
+                MAX_DOWNLOAD_RETRIES,
+                url,
+                exc,
+                sleep_seconds,
+            )
+            time.sleep(sleep_seconds)
+
+    raise RuntimeError(f"Download failed after retries: {url}") from last_error
 
 
 def _download_fred_series(series_id: str, url_template: str, value_name: str) -> pd.DataFrame:
@@ -36,8 +69,7 @@ def _download_fred_series(series_id: str, url_template: str, value_name: str) ->
     url = url_template.format(series_id=series_id)
     logger.info("Downloading FRED data from %s", url)
 
-    response = requests.get(url, timeout=30)
-    response.raise_for_status()
+    response = _get_with_retries(url)
 
     df = pd.read_csv(io.BytesIO(response.content))
     if df.empty or len(df.columns) < 2:
@@ -57,8 +89,7 @@ def _download_ny_fed_gscpi(url: str, value_name: str) -> pd.DataFrame:
     """
     logger.info("Downloading New York Fed GSCPI data from %s", url)
 
-    response = requests.get(url, timeout=30)
-    response.raise_for_status()
+    response = _get_with_retries(url)
 
     df = pd.read_excel(io.BytesIO(response.content), sheet_name="GSCPI Monthly Data")
     df = df[["Date", "GSCPI"]].copy()
@@ -72,6 +103,7 @@ def _download_ny_fed_gscpi(url: str, value_name: str) -> pd.DataFrame:
 def _build_monthly_indicators(
     indicator_cfg: list[dict[str, Any]],
     url_template: str,
+    existing_indicators_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """
     Download configured FRED indicator series and aggregate them to monthly rows.
@@ -83,10 +115,29 @@ def _build_monthly_indicators(
         series_id = indicator.get("series_id", source)
         name = indicator.get("name", str(series_id).lower())
 
-        if source == "ny_fed_gscpi":
-            raw_df = _download_ny_fed_gscpi(indicator["url"], name)
-        else:
-            raw_df = _download_fred_series(series_id, url_template, name)
+        try:
+            if source == "ny_fed_gscpi":
+                raw_df = _download_ny_fed_gscpi(indicator["url"], name)
+            else:
+                raw_df = _download_fred_series(series_id, url_template, name)
+        except Exception as exc:
+            if (
+                existing_indicators_df is not None
+                and not existing_indicators_df.empty
+                and {"month", name}.issubset(existing_indicators_df.columns)
+            ):
+                logger.warning(
+                    "Failed to download indicator %s; using existing local values. Error: %s",
+                    name,
+                    exc,
+                )
+                fallback_df = existing_indicators_df[["month", name]].copy()
+                fallback_df["month"] = pd.to_datetime(fallback_df["month"], errors="coerce")
+                fallback_df[name] = pd.to_numeric(fallback_df[name], errors="coerce")
+                fallback_df = fallback_df.dropna(subset=["month"]).sort_values("month").reset_index(drop=True)
+                monthly_frames.append(fallback_df)
+                continue
+            raise
 
         raw_df["month"] = raw_df["date"].dt.to_period("M").dt.to_timestamp()
         monthly_df = (
@@ -151,7 +202,12 @@ def ingest_fred(config_path: str = "configs/config.yaml") -> pd.DataFrame:
 
     indicators_cfg = fred_cfg.get("indicators", [])
     if indicators_cfg:
-        indicators_df = _build_monthly_indicators(indicators_cfg, url_template)
+        existing_indicators_df = load_dataframe_from_sqlite(sqlite_path, "fred_indicators")
+        indicators_df = _build_monthly_indicators(
+            indicators_cfg,
+            url_template,
+            existing_indicators_df=existing_indicators_df,
+        )
         save_dataframe_to_sqlite(indicators_df, sqlite_path, "fred_indicators")
         logger.info(
             "Saved FRED indicators to SQLite database %s (table=fred_indicators, %s rows)",

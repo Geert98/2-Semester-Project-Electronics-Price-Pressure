@@ -54,6 +54,7 @@ def fetch_json_with_retry(
     url: str,
     params: dict,
     provider_name: str,
+    headers: dict | None = None,
     max_retries: int = 5,
     base_sleep: float = 5.0,
     before_request: Callable[[], None] | None = None,
@@ -65,7 +66,7 @@ def fetch_json_with_retry(
             if before_request:
                 before_request()
 
-            response = requests.get(url, params=params, timeout=60)
+            response = requests.get(url, params=params, headers=headers, timeout=60)
 
             if response.status_code == 429:
                 fallback_sleep = base_sleep * (2**attempt)

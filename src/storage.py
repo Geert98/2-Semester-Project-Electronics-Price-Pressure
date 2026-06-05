@@ -123,12 +123,16 @@ def load_dataframe_from_mongo(
     config: dict[str, Any],
     collection_name: str,
     sort_by: str | None = None,
+    projection: dict[str, int] | None = None,
 ) -> pd.DataFrame:
     uri, db_name = get_mongo_settings(config)
     client = MongoClient(uri, serverSelectionTimeoutMS=5000)
     try:
         client.admin.command("ping")
-        records = list(client[db_name][collection_name].find({}, {"_id": 0}))
+        mongo_projection = {"_id": 0}
+        if projection:
+            mongo_projection.update(projection)
+        records = list(client[db_name][collection_name].find({}, mongo_projection))
     finally:
         client.close()
 

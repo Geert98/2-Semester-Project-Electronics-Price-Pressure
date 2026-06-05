@@ -109,8 +109,25 @@ def export_news_for_ai_lab(
     source_collection = mongo_cfg["test_clean_news_collection"]
     enriched_collection = mongo_cfg["test_enriched_news_collection"]
 
-    clean_df = load_dataframe_from_mongo(config, source_collection, sort_by="published_at")
-    enriched_df = load_dataframe_from_mongo(config, enriched_collection)
+    clean_df = load_dataframe_from_mongo(
+        config,
+        source_collection,
+        sort_by="published_at",
+        projection={
+            "url": 1,
+            "title": 1,
+            "provider": 1,
+            "source": 1,
+            "published_at": 1,
+            "month": 1,
+            "clean_text": 1,
+        },
+    )
+    enriched_df = load_dataframe_from_mongo(
+        config,
+        enriched_collection,
+        projection={"url": 1},
+    )
 
     if clean_df.empty:
         raise ValueError(f"No articles found in MongoDB collection: {source_collection}")
@@ -140,6 +157,7 @@ def export_news_for_ai_lab(
             record = {
                 "url": row.get("url"),
                 "title": row.get("title"),
+                "provider": row.get("provider"),
                 "source": row.get("source"),
                 "published_at": _json_default(row.get("published_at")),
                 "month": _json_default(row.get("month")),

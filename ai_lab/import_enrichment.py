@@ -35,6 +35,7 @@ def _normalize_record(record: dict) -> dict:
     normalized = {
         "url": record.get("url"),
         "title": record.get("title"),
+        "provider": record.get("provider"),
         "source": record.get("source"),
         "published_at": record.get("published_at"),
         "month": record.get("month"),

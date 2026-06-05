@@ -1,0 +1,14 @@
+{
+  "input_path": "data/processed/model_table.csv",
+  "comparison_path": "artifacts/metrics/recent_period_model_comparison.csv",
+  "ai_lift_path": "artifacts/metrics/recent_period_ai_lift_comparison.csv",
+  "start_years": [
+    2020,
+    2021,
+    2022,
+    2023
+  ],
+  "validation_size_months": 12,
+  "test_size_months": 12,
+  "min_train_months": 24
+}
