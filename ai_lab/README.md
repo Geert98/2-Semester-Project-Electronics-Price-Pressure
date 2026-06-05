@@ -3,6 +3,42 @@
 This folder contains the minimal files needed to run article enrichment on AAU
 AI-LAB with Slurm, Singularity, and vLLM.
 
+The normal workflow is:
+
+```text
+prepare_batch.py -> run_ai_lab.sh on AI-LAB -> import_enrichment.py
+```
+
+`run_ai_lab.sh` uses Qwen 2.5 32B for enrichment and Mistral Small 24B for the
+optional LLM-as-judge quality audit.
+
+## Offline Evidence Bundle
+
+The local folder `ai_lab/upload_bundle_next_ready/` may be kept as a complete
+finished AI-LAB run for examiners. It contains:
+
+```text
+inputs/news_to_enrich_*.jsonl
+results/news_enriched_*.jsonl
+results/news_judged_*.jsonl
+logs/out/
+logs/err/
+batch_manifest.json
+```
+
+It is ignored by Git because `inputs/` contains article text and runtime output.
+If the folder is shared separately, examiners can inspect the AI labels and logs
+without needing MongoDB Atlas or API keys.
+
+To import that finished bundle into MongoDB locally:
+
+```bash
+python -m ai_lab.import_enrichment --input ai_lab/upload_bundle_next_ready/results
+```
+
+If MongoDB is not available, use the committed `data/processed/model_table.csv`
+and run the offline modeling commands from the main README instead.
+
 ## Prepare Upload Bundle
 
 From the project root on your local machine:

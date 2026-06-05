@@ -9,9 +9,9 @@ from __future__ import annotations
 # 2. sets up logging
 # 3. loads the shared configuration
 # 4. ensures required directories exist
-# 5. runs data ingestion
+# 5. refreshes structured/news data
 # 6. runs preprocessing
-# 7. runs feature engineering
+# 7. builds features from imported AI-LAB labels
 # 8. trains the model
 # 9. generates the latest prediction
 # 10. generates the static GitHub Pages report
@@ -22,7 +22,6 @@ from __future__ import annotations
 
 from src.feature_engineering import build_feature_table
 from src.generate_pages_report import generate_pages_report
-from src.enrich_news_ai import enrich_news_ai
 from src.ingest_fred import ingest_fred
 from src.ingest_news import ingest_news
 from src.predict import predict_latest
@@ -50,8 +49,8 @@ def main() -> None:
     4. Ingest structured FRED data
     5. Ingest unstructured news data
     6. Preprocess raw news
-    7. Build the monthly feature table
-    8. Train the baseline model
+    7. Build the monthly feature table from imported AI-LAB labels
+    8. Train the comparison models
     9. Generate the latest prediction
     10. Generate the static GitHub Pages report
 
@@ -74,25 +73,26 @@ def main() -> None:
     # Step 1: Ingest the structured external market data from FRED.
     ingest_fred()
 
-    # Step 2: Ingest the unstructured external news data from GDELT.
+    # Step 2: Ingest unstructured news data from the enabled providers.
     ingest_news()
 
     # Step 3: Clean and standardize the raw news data.
     preprocess_news()
 
-    # Step 4: Enrich cleaned articles with relevance and price-pressure labels.
-    enrich_news_ai()
+    # AI enrichment is intentionally handled as a separate AI-LAB batch process.
+    # Import those labels before this step with:
+    #   python -m ai_lab.import_enrichment --input <upload_bundle>/results
 
-    # Step 5: Combine processed news and FRED data into a model-ready feature table.
+    # Step 4: Combine processed news, FRED data, and imported AI labels.
     build_feature_table()
 
-    # Step 6: Train the baseline classifier and save model artifacts.
+    # Step 5: Train model candidates and save model artifacts.
     train_model()
 
-    # Step 7: Generate the latest available prediction using the trained model.
+    # Step 6: Generate the latest available prediction using the trained model.
     prediction = predict_latest()
 
-    # Step 8: Generate the static dashboard for GitHub Pages.
+    # Step 7: Generate the static dashboard for GitHub Pages.
     report_path = generate_pages_report()
 
     # Print a short completion message and key output locations.

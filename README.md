@@ -3,9 +3,11 @@
 An end-to-end MLOps-style pipeline for monitoring and predicting short-term **electronics price pressure** using:
 
 - structured market indicator data from **FRED** stored in **SQLite**
-- unstructured news data from **The Guardian Open Platform** stored in **MongoDB**
+- unstructured news data from **The Guardian**, **Hacker News**, **NYT**, and
+  optional Reuters/RapidAPI sources stored in **MongoDB**
 - feature engineering across both sources
-- a baseline classification model
+- Logistic Regression and XGBoost model comparisons, with and without AI news
+  features
 - automated artifact generation
 - scheduled execution with **GitHub Actions**
 - a static frontend published through **GitHub Pages**
@@ -117,22 +119,77 @@ Automation
 
 ## Pipeline Overview
 
-The full pipeline performs the following steps:
-1.	Download the FRED producer price index series, WTI oil prices, and the New York Fed Global Supply Chain Pressure Index, then persist them in SQLite
-2.	Download historical Guardian news data and recent NewsAPI.org articles, then persist them in MongoDB
-3.	Clean and preprocess the news articles in MongoDB
-4.	Aggregate article-level data to monthly features
-5.	Build lagged and rolling structured features from SQLite-backed FRED data
-6.	Construct the next-period target class
-7.	Train and compare Logistic Regression and XGBoost classifiers
-8.	Evaluate models on a time-based holdout test set and save the best model
-9.	Generate the latest prediction artifact
-10.	Generate a static HTML report for GitHub Pages
+The project is split into two flows so the expensive LLM step stays explicit.
+
+Core modeling flow:
+1. Download the FRED producer price index series, WTI oil prices, and the New
+   York Fed Global Supply Chain Pressure Index, then persist them in SQLite
+2. Download or update news articles in MongoDB
+3. Clean and preprocess the news articles
+4. Import AI-LAB enrichment labels when a new AI batch has been run
+5. Aggregate article-level AI labels and economic indicators to monthly features
+6. Build lagged and rolling features, then construct the next-month target class
+7. Train and compare Logistic Regression and XGBoost with and without AI features
+8. Generate the latest prediction and static report
+
+AI-LAB enrichment flow:
+1. Export cleaned articles with `python -m ai_lab.prepare_batch`
+2. Upload `ai_lab/upload_bundle/` to AI-LAB
+3. Run `sbatch run_ai_lab.sh qwen25-32b`
+4. Download the finished bundle
+5. Import labels with `python -m ai_lab.import_enrichment --input <bundle>/results`
 
 ---
 MongoDB is required for the news pipeline. The default local setup uses Docker Compose, while a production-like setup can point `MONGO_URI` to an external MongoDB service such as UCloud.
 Raw news articles are upserted by URL in MongoDB, so repeated pipeline runs add new articles and update existing ones without deleting previously ingested Guardian or NewsAPI.org articles.
 ---
+
+## Reproducibility Modes
+
+### Fast Offline Review
+
+Use this path when you do not have API keys, MongoDB Atlas access, or AI-LAB
+access. The repository includes the latest processed model table, trained model,
+metrics, prediction artifact, and static report.
+
+```bash
+python -m src.train
+python -m src.predict
+python -m src.generate_pages_report
+```
+
+This reproduces the model comparison from the committed processed data. It does
+not fetch news, call APIs, connect to MongoDB, or run LLM enrichment.
+
+The local folder `ai_lab/upload_bundle_next_ready/` can be kept as a complete
+AI-LAB evidence bundle for examiners. It is intentionally ignored by Git because
+its `inputs/` folder contains article text and runtime logs. If it is shared
+separately, examiners can inspect `results/news_enriched_*.jsonl`,
+`results/news_judged_*.jsonl`, and the AI-LAB logs without needing MongoDB.
+
+### Full Refresh
+
+Use this path when you want to collect new data and rerun the full project:
+
+```bash
+python -m src.ingest_fred
+python -m src.ingest_news
+python -m src.preprocess
+python -m ai_lab.prepare_batch
+```
+
+Then run the generated bundle on AI-LAB and import the result:
+
+```bash
+python -m ai_lab.import_enrichment --input ai_lab/upload_bundle/results
+python -m src.feature_engineering
+python -m src.train
+python -m src.predict
+python -m src.generate_pages_report
+```
+
+`run_pipeline.py` covers the local refresh after AI labels have been imported.
+It does not run LLM enrichment itself.
 
 ## Build, Run, and Reproduce
 
@@ -256,13 +313,16 @@ MONGO_DB_NAME=electronics_price_pressure
 
 Keep these values in `.env` locally and in GitHub Actions repository secrets. Do not commit database credentials.
 
-#### 6. Run the full pipeline
+#### 6. Run the local modeling pipeline
 ```bash
 python run_pipeline.py
 ```
 
 This will:
-ingest data --> preprocess data --> engineer features --> train the model --> generate the latest prediction --> generate the static report
+ingest data --> preprocess data --> engineer features from imported AI labels --> train the model --> generate the latest prediction --> generate the static report
+
+AI-LAB enrichment is deliberately separate. Run `python -m ai_lab.prepare_batch`
+and `python -m ai_lab.import_enrichment` when you need to refresh article labels.
 
 #### 7. Open FastAPI locally
 ```bash
