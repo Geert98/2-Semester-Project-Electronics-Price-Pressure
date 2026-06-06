@@ -511,6 +511,35 @@ def _build_ai_lift_rows(model_comparison_rows: list[dict]) -> list[dict]:
     return rows
 
 
+def _build_feature_set_column_rows(feature_columns_by_result: dict[str, list[str]]) -> list[dict]:
+    """
+    Build a transparent feature-set-to-column mapping for reporting.
+
+    The selected feature columns only depend on the feature set, not on the
+    model candidate. Store each feature set once even though each result_id is
+    feature_set::model_name.
+    """
+    rows = []
+    seen_feature_sets = set()
+
+    for result_id, feature_cols in feature_columns_by_result.items():
+        feature_set = result_id.split("::", maxsplit=1)[0]
+        if feature_set in seen_feature_sets:
+            continue
+
+        seen_feature_sets.add(feature_set)
+        for feature_index, feature in enumerate(feature_cols, start=1):
+            rows.append(
+                {
+                    "feature_set": feature_set,
+                    "feature_index": feature_index,
+                    "feature": feature,
+                }
+            )
+
+    return rows
+
+
 def train_model(config_path: str = "configs/config.yaml") -> dict:
     """
     Train the baseline classification model using the monthly feature table.
@@ -711,6 +740,7 @@ def train_model(config_path: str = "configs/config.yaml") -> dict:
         test_model_results=test_model_results,
     )
     ai_lift_rows = _build_ai_lift_rows(model_comparison_rows)
+    feature_set_column_rows = _build_feature_set_column_rows(feature_columns_by_result)
 
     # Collect evaluation metrics and metadata in one dictionary.
     metrics = {
@@ -743,6 +773,7 @@ def train_model(config_path: str = "configs/config.yaml") -> dict:
         "test_naive_results": test_naive_results,
         "model_comparison": model_comparison_rows,
         "ai_lift_comparison": ai_lift_rows,
+        "feature_set_columns": feature_set_column_rows,
         "model_results": test_model_results,
         "validation_months": [str(x.date()) for x in validation_months],
         "test_months": [str(x.date()) for x in test_months],
@@ -764,6 +795,7 @@ def train_model(config_path: str = "configs/config.yaml") -> dict:
     metrics_path = metrics_dir / "train_metrics.json"
     model_comparison_path = metrics_dir / "model_comparison.csv"
     ai_lift_path = metrics_dir / "ai_lift_comparison.csv"
+    feature_set_columns_path = metrics_dir / "feature_set_columns.csv"
 
     # Save the trained sklearn pipeline.
     # This includes both preprocessing and model logic.
@@ -777,12 +809,14 @@ def train_model(config_path: str = "configs/config.yaml") -> dict:
     save_json(metrics, str(metrics_path))
     pd.DataFrame(model_comparison_rows).to_csv(model_comparison_path, index=False)
     pd.DataFrame(ai_lift_rows).to_csv(ai_lift_path, index=False)
+    pd.DataFrame(feature_set_column_rows).to_csv(feature_set_columns_path, index=False)
 
     logger.info("Saved model to %s", model_path)
     logger.info("Saved feature columns to %s", features_path)
     logger.info("Saved metrics to %s", metrics_path)
     logger.info("Saved model comparison to %s", model_comparison_path)
     logger.info("Saved AI lift comparison to %s", ai_lift_path)
+    logger.info("Saved feature set columns to %s", feature_set_columns_path)
 
     return metrics
 

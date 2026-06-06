@@ -1549,6 +1549,698 @@
       "test_accuracy_lift": 0.02777777777777779
     }
   ],
+  "feature_set_columns": [
+    {
+      "feature_set": "baseline",
+      "feature_index": 1,
+      "feature": "ppi_value"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 2,
+      "feature": "gscpi"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 3,
+      "feature": "wti_oil_price"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 4,
+      "feature": "ppi_pct_change"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 5,
+      "feature": "ppi_lag_1"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 6,
+      "feature": "ppi_pct_change_lag_1"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 7,
+      "feature": "ppi_ma_3"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 8,
+      "feature": "ppi_std_3"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 9,
+      "feature": "gscpi_pct_change"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 10,
+      "feature": "gscpi_lag_1"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 11,
+      "feature": "gscpi_pct_change_lag_1"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 12,
+      "feature": "wti_oil_price_pct_change"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 13,
+      "feature": "wti_oil_price_lag_1"
+    },
+    {
+      "feature_set": "baseline",
+      "feature_index": 14,
+      "feature": "wti_oil_price_pct_change_lag_1"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 1,
+      "feature": "ppi_value"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 2,
+      "feature": "ai_enriched_article_count"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 3,
+      "feature": "ai_relevant_share"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 4,
+      "feature": "ai_relevant_article_count"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 5,
+      "feature": "ai_high_relevance_share"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 6,
+      "feature": "ai_relevance_weighted_sentiment"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 7,
+      "feature": "ai_relevance_weighted_pressure_direction_score"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 8,
+      "feature": "ai_relevance_weighted_pressure_strength"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 9,
+      "feature": "ai_relevant_upward_pressure_share"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 10,
+      "feature": "ai_relevant_downward_pressure_share"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 11,
+      "feature": "gscpi"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 12,
+      "feature": "wti_oil_price"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 13,
+      "feature": "ai_no_articles"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 14,
+      "feature": "ai_articles_but_none_relevant"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 15,
+      "feature": "ai_relevant_articles_available"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 16,
+      "feature": "ai_relevant_article_count_lag_1"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 17,
+      "feature": "ai_relevant_article_count_lag_2"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 18,
+      "feature": "ai_relevant_article_count_lag_3"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 19,
+      "feature": "ai_relevant_article_count_roll_3_mean"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 20,
+      "feature": "ai_relevant_article_count_roll_3_std"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 21,
+      "feature": "ai_relevance_weighted_sentiment_lag_1"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 22,
+      "feature": "ai_relevance_weighted_sentiment_lag_2"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 23,
+      "feature": "ai_relevance_weighted_sentiment_lag_3"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 24,
+      "feature": "ai_relevance_weighted_sentiment_roll_3_mean"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 25,
+      "feature": "ai_relevance_weighted_sentiment_roll_3_std"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 26,
+      "feature": "ai_relevance_weighted_pressure_direction_score_lag_1"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 27,
+      "feature": "ai_relevance_weighted_pressure_direction_score_lag_2"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 28,
+      "feature": "ai_relevance_weighted_pressure_direction_score_lag_3"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 29,
+      "feature": "ai_relevance_weighted_pressure_direction_score_roll_3_mean"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 30,
+      "feature": "ai_relevance_weighted_pressure_direction_score_roll_3_std"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 31,
+      "feature": "ai_relevance_weighted_pressure_strength_lag_1"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 32,
+      "feature": "ai_relevance_weighted_pressure_strength_lag_2"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 33,
+      "feature": "ai_relevance_weighted_pressure_strength_lag_3"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 34,
+      "feature": "ai_relevance_weighted_pressure_strength_roll_3_mean"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 35,
+      "feature": "ai_relevance_weighted_pressure_strength_roll_3_std"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 36,
+      "feature": "ai_relevant_upward_pressure_share_lag_1"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 37,
+      "feature": "ai_relevant_upward_pressure_share_lag_2"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 38,
+      "feature": "ai_relevant_upward_pressure_share_lag_3"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 39,
+      "feature": "ai_relevant_upward_pressure_share_roll_3_mean"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 40,
+      "feature": "ai_relevant_upward_pressure_share_roll_3_std"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 41,
+      "feature": "ppi_pct_change"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 42,
+      "feature": "ppi_lag_1"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 43,
+      "feature": "ppi_pct_change_lag_1"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 44,
+      "feature": "ppi_ma_3"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 45,
+      "feature": "ppi_std_3"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 46,
+      "feature": "gscpi_pct_change"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 47,
+      "feature": "gscpi_lag_1"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 48,
+      "feature": "gscpi_pct_change_lag_1"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 49,
+      "feature": "wti_oil_price_pct_change"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 50,
+      "feature": "wti_oil_price_lag_1"
+    },
+    {
+      "feature_set": "ai_compact",
+      "feature_index": 51,
+      "feature": "wti_oil_price_pct_change_lag_1"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 1,
+      "feature": "ppi_value"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 2,
+      "feature": "gscpi"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 3,
+      "feature": "wti_oil_price"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 4,
+      "feature": "ppi_pct_change"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 5,
+      "feature": "ppi_lag_1"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 6,
+      "feature": "ppi_pct_change_lag_1"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 7,
+      "feature": "ppi_ma_3"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 8,
+      "feature": "ppi_std_3"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 9,
+      "feature": "gscpi_pct_change"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 10,
+      "feature": "gscpi_lag_1"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 11,
+      "feature": "gscpi_pct_change_lag_1"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 12,
+      "feature": "wti_oil_price_pct_change"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 13,
+      "feature": "wti_oil_price_lag_1"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 14,
+      "feature": "wti_oil_price_pct_change_lag_1"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 15,
+      "feature": "target_class_lag_1_score"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 16,
+      "feature": "target_class_lag_1_is_low"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 17,
+      "feature": "target_class_lag_1_is_medium"
+    },
+    {
+      "feature_set": "baseline_with_persistence",
+      "feature_index": 18,
+      "feature": "target_class_lag_1_is_high"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 1,
+      "feature": "ppi_value"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 2,
+      "feature": "ai_enriched_article_count"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 3,
+      "feature": "ai_relevant_share"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 4,
+      "feature": "ai_relevant_article_count"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 5,
+      "feature": "ai_high_relevance_share"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 6,
+      "feature": "ai_relevance_weighted_sentiment"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 7,
+      "feature": "ai_relevance_weighted_pressure_direction_score"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 8,
+      "feature": "ai_relevance_weighted_pressure_strength"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 9,
+      "feature": "ai_relevant_upward_pressure_share"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 10,
+      "feature": "ai_relevant_downward_pressure_share"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 11,
+      "feature": "gscpi"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 12,
+      "feature": "wti_oil_price"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 13,
+      "feature": "ai_no_articles"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 14,
+      "feature": "ai_articles_but_none_relevant"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 15,
+      "feature": "ai_relevant_articles_available"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 16,
+      "feature": "ai_relevant_article_count_lag_1"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 17,
+      "feature": "ai_relevant_article_count_lag_2"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 18,
+      "feature": "ai_relevant_article_count_lag_3"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 19,
+      "feature": "ai_relevant_article_count_roll_3_mean"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 20,
+      "feature": "ai_relevant_article_count_roll_3_std"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 21,
+      "feature": "ai_relevance_weighted_sentiment_lag_1"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 22,
+      "feature": "ai_relevance_weighted_sentiment_lag_2"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 23,
+      "feature": "ai_relevance_weighted_sentiment_lag_3"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 24,
+      "feature": "ai_relevance_weighted_sentiment_roll_3_mean"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 25,
+      "feature": "ai_relevance_weighted_sentiment_roll_3_std"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 26,
+      "feature": "ai_relevance_weighted_pressure_direction_score_lag_1"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 27,
+      "feature": "ai_relevance_weighted_pressure_direction_score_lag_2"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 28,
+      "feature": "ai_relevance_weighted_pressure_direction_score_lag_3"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 29,
+      "feature": "ai_relevance_weighted_pressure_direction_score_roll_3_mean"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 30,
+      "feature": "ai_relevance_weighted_pressure_direction_score_roll_3_std"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 31,
+      "feature": "ai_relevance_weighted_pressure_strength_lag_1"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 32,
+      "feature": "ai_relevance_weighted_pressure_strength_lag_2"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 33,
+      "feature": "ai_relevance_weighted_pressure_strength_lag_3"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 34,
+      "feature": "ai_relevance_weighted_pressure_strength_roll_3_mean"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 35,
+      "feature": "ai_relevance_weighted_pressure_strength_roll_3_std"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 36,
+      "feature": "ai_relevant_upward_pressure_share_lag_1"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 37,
+      "feature": "ai_relevant_upward_pressure_share_lag_2"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 38,
+      "feature": "ai_relevant_upward_pressure_share_lag_3"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 39,
+      "feature": "ai_relevant_upward_pressure_share_roll_3_mean"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 40,
+      "feature": "ai_relevant_upward_pressure_share_roll_3_std"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 41,
+      "feature": "ppi_pct_change"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 42,
+      "feature": "ppi_lag_1"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 43,
+      "feature": "ppi_pct_change_lag_1"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 44,
+      "feature": "ppi_ma_3"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 45,
+      "feature": "ppi_std_3"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 46,
+      "feature": "gscpi_pct_change"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 47,
+      "feature": "gscpi_lag_1"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 48,
+      "feature": "gscpi_pct_change_lag_1"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 49,
+      "feature": "wti_oil_price_pct_change"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 50,
+      "feature": "wti_oil_price_lag_1"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 51,
+      "feature": "wti_oil_price_pct_change_lag_1"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 52,
+      "feature": "target_class_lag_1_score"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 53,
+      "feature": "target_class_lag_1_is_low"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 54,
+      "feature": "target_class_lag_1_is_medium"
+    },
+    {
+      "feature_set": "ai_compact_with_persistence",
+      "feature_index": 55,
+      "feature": "target_class_lag_1_is_high"
+    }
+  ],
   "model_results": {
     "baseline::logistic_regression": {
       "model_name": "logistic_regression",
