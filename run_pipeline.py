@@ -21,6 +21,7 @@ from __future__ import annotations
 # or API-triggered execution.
 
 from src.feature_engineering import build_feature_table
+from src.compare_models import compare_models
 from src.generate_pages_report import generate_pages_report
 from src.ingest_fred import ingest_fred
 from src.ingest_news import ingest_news
@@ -89,14 +90,18 @@ def main() -> None:
     # Step 5: Train model candidates and save model artifacts.
     train_model()
 
-    # Step 6: Generate the latest available prediction using the trained model.
+    # Step 6: Compare the trained candidates using the saved metrics.
+    comparison = compare_models()
+
+    # Step 7: Generate the latest available prediction using the trained model.
     prediction = predict_latest()
 
-    # Step 7: Generate the static dashboard for GitHub Pages.
+    # Step 8: Generate the static dashboard for GitHub Pages.
     report_path = generate_pages_report()
 
     # Print a short completion message and key output locations.
     print("\nPipeline completed successfully.\n")
+    print(f"Best model from comparison: {comparison['best_model']}\n")
     print(prediction.to_string(index=False))
     print(f"\nStatic report generated at: {report_path}\n")
 
