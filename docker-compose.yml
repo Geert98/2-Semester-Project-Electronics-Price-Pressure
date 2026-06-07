@@ -1,30 +1,31 @@
 services:
-  mongodb:
-    image: mongo:7.0
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  app:
+  api:
     build: .
-    depends_on:
-      mongodb:
-        condition: service_healthy
+    restart: unless-stopped
     environment:
-      MONGO_URI: mongodb://mongodb:27017
-      MONGO_DB_NAME: electronics_price_pressure
+      MONGO_URI: ${MONGO_URI}
+      MONGO_DB_NAME: ${MONGO_DB_NAME:-electronics_price_pressure}
     volumes:
       - ./:/app
     ports:
       - "8000:8000"
     command: uvicorn app.api:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
-volumes:
-  mongo_data:
+  streamlit:
+    build: .
+    restart: unless-stopped
+    environment:
+      API_BASE_URL: http://api:8000
+    volumes:
+      - ./:/app
+    ports:
+      - "8501:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+    command: streamlit run app/streamlit_app.py --server.address 0.0.0.0 --server.port 8501

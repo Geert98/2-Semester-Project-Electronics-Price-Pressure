@@ -27,7 +27,6 @@ from src.ingest_fred import ingest_fred
 from src.ingest_news import ingest_news
 from src.predict import predict_latest
 from src.preprocess import preprocess_news
-from src.storage import load_dataframe_from_mongo
 from src.train import train_model
 from src.utils import ensure_directories, get_log_level, load_config, setup_env, setup_logging
 from src.generate_pages_report import generate_pages_report
@@ -64,6 +63,78 @@ def _prepare_environment() -> dict:
     config = load_config()
     ensure_directories(config["paths"])
     return config
+
+
+def _load_latest_prediction_record(config: dict) -> dict:
+    """
+    Load the latest prediction record from the prediction artifact CSV.
+
+    Raises
+    ------
+    HTTPException
+        If the prediction artifact is missing or empty.
+    """
+    pred_path = Path(config["paths"]["predictions_dir"]) / "latest_prediction.csv"
+
+    if not pred_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="No prediction file found. Run the pipeline first via POST /run-pipeline.",
+        )
+
+    df = pd.read_csv(pred_path)
+    if df.empty:
+        raise HTTPException(
+            status_code=404,
+            detail="Prediction file exists but is empty.",
+        )
+
+    return df.iloc[0].to_dict()
+
+
+def _load_metrics(config: dict) -> dict:
+    """
+    Load the training metrics artifact from disk.
+
+    Raises
+    ------
+    HTTPException
+        If the metrics artifact does not exist.
+    """
+    metrics_path = Path(config["paths"]["metrics_dir"]) / "train_metrics.json"
+
+    if not metrics_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="No metrics file found. Run the pipeline first via POST /run-pipeline.",
+        )
+
+    with open(metrics_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _load_metrics_table(config: dict, filename: str) -> list[dict]:
+    """
+    Load a CSV metrics artifact and return JSON-safe row records.
+
+    Raises
+    ------
+    HTTPException
+        If the file is missing.
+    """
+    metrics_path = Path(config["paths"]["metrics_dir"]) / filename
+
+    if not metrics_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Metrics artifact '{filename}' was not found.",
+        )
+
+    df = pd.read_csv(metrics_path)
+    if df.empty:
+        return []
+
+    return df.where(pd.notna(df), None).to_dict(orient="records")
 
 
 @app.get("/health")
@@ -107,27 +178,7 @@ def latest_prediction() -> dict:
         If the prediction file does not exist or is empty.
     """
     config = _prepare_environment()
-    pred_path = Path(config["paths"]["predictions_dir"]) / "latest_prediction.csv"
-
-    # If the prediction file has not been created yet, return a clear API error.
-    if not pred_path.exists():
-        raise HTTPException(
-            status_code=404,
-            detail="No prediction file found. Run the pipeline first via POST /run-pipeline.",
-        )
-
-    # Load the saved prediction artifact.
-    df = pd.read_csv(pred_path)
-
-    # Protect against the case where the file exists but contains no rows.
-    if df.empty:
-        raise HTTPException(
-            status_code=404,
-            detail="Prediction file exists but is empty.",
-        )
-
-    # Convert the first row to a plain dictionary for JSON output.
-    record = df.iloc[0].to_dict()
+    record = _load_latest_prediction_record(config)
 
     return {
         "status": "success",
@@ -136,7 +187,7 @@ def latest_prediction() -> dict:
 
 
 @app.get("/metrics")
-def get_metrics() -> dict:
+def get_metrics(include: list[str] | None = Query(default=None)) -> dict:
     """
     Return the saved training metrics artifact.
 
@@ -156,18 +207,10 @@ def get_metrics() -> dict:
         If the metrics file does not exist.
     """
     config = _prepare_environment()
-    metrics_path = Path(config["paths"]["metrics_dir"]) / "train_metrics.json"
+    metrics = _load_metrics(config)
 
-    # If the metrics artifact does not exist yet, return a clear API error.
-    if not metrics_path.exists():
-        raise HTTPException(
-            status_code=404,
-            detail="No metrics file found. Run the pipeline first via POST /run-pipeline.",
-        )
-
-    # Load the saved metrics JSON artifact.
-    with open(metrics_path, "r", encoding="utf-8") as f:
-        metrics = json.load(f)
+    if include:
+        metrics = {key: metrics.get(key) for key in include if key in metrics}
 
     return {
         "status": "success",
@@ -175,78 +218,47 @@ def get_metrics() -> dict:
     }
 
 
-@app.get("/news-articles")
-def get_news_articles(
-    limit: int = Query(default=50, ge=1, le=500),
-    cleaned: bool = Query(default=True),
-) -> dict:
+@app.get("/results")
+def get_results(include_metrics: bool = Query(default=True)) -> dict:
     """
-    Return recent ingested news articles.
+    Return the latest prediction and (optionally) training metrics in one call.
 
     Why this endpoint exists:
-    - The news articles are a core input to the feature pipeline.
-    - Exposing a compact article list makes ingestion easier to inspect
-      without connecting directly to MongoDB.
-
-    Parameters
-    ----------
-    limit : int
-        Maximum number of articles to return.
-    cleaned : bool
-        If True, read from the cleaned news collection. Otherwise read raw news.
-
-    Returns
-    -------
-    dict
-        JSON response containing recent article metadata.
+    - Dashboard clients often need both artifacts at the same time.
+    - A combined endpoint reduces request overhead and simplifies polling.
     """
     config = _prepare_environment()
-    mongo_cfg = config["storage"]["mongo"]
-    collection_name = (
-        mongo_cfg["clean_news_collection"]
-        if cleaned
-        else mongo_cfg["raw_news_collection"]
-    )
 
-    sort_by = "published_at" if cleaned else "seen_date"
-    df = load_dataframe_from_mongo(config, collection_name, sort_by=sort_by)
+    payload = {
+        "status": "success",
+        "prediction": _load_latest_prediction_record(config),
+    }
 
-    if df.empty:
-        return {
-            "status": "success",
-            "collection": collection_name,
-            "count": 0,
-            "articles": [],
-        }
+    if include_metrics:
+        payload["metrics"] = _load_metrics(config)
 
-    preferred_columns = [
-        "provider",
-        "published_at",
-        "seen_date",
-        "month",
-        "title",
-        "url",
-        "source",
-        "language",
-        "source_country",
-        "clean_text",
-    ]
-    columns = [col for col in preferred_columns if col in df.columns]
-    article_df = df[columns].tail(limit).iloc[::-1].copy()
+    return payload
 
-    for date_col in ["published_at", "seen_date", "month"]:
-        if date_col in article_df.columns:
-            article_df[date_col] = pd.to_datetime(article_df[date_col], errors="coerce")
-            article_df[date_col] = article_df[date_col].dt.strftime("%Y-%m-%d")
-            article_df[date_col] = article_df[date_col].fillna("")
 
-    article_df = article_df.fillna("")
+@app.get("/model-comparisons")
+def get_model_comparisons() -> dict:
+    """
+    Return model-comparison metric tables used by the Streamlit comparison page.
+
+    Why this endpoint exists:
+    - Keeps comparison dashboards API-driven in docker/networked deployments.
+    - Avoids duplicate CSV loading logic across frontend pages.
+    """
+    config = _prepare_environment()
 
     return {
         "status": "success",
-        "collection": collection_name,
-        "count": int(len(article_df)),
-        "articles": article_df.to_dict(orient="records"),
+        "tables": {
+            "model_comparison": _load_metrics_table(config, "model_comparison.csv"),
+            "ai_lift_comparison": _load_metrics_table(config, "ai_lift_comparison.csv"),
+            "recent_period_model_comparison": _load_metrics_table(config, "recent_period_model_comparison.csv"),
+            "recent_period_ai_lift_comparison": _load_metrics_table(config, "recent_period_ai_lift_comparison.csv"),
+        },
     }
 
 
