@@ -35,7 +35,7 @@ SHA256 761e2d64c27e08e5dea8261ad7aafcd745f497c9188e8f4d7ec648c22481f700
 External download URL:
 
 ```text
-<paste shared link here>
+https://drive.google.com/drive/folders/1wk56Mwk6uxmATXxR29ff1GB3icUEj_PR?usp=sharing
 ```
 
 ## Inspect Without MongoDB

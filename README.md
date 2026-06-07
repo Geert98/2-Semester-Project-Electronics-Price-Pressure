@@ -35,7 +35,7 @@ Pages links:
 
 Note: article-level news content and article URLs are intentionally excluded from Pages output. Only model artifacts and aggregate signal tables are published.
 
-### AI-LAB Evidence Bundle For Examiners
+### AI-LAB Data Bundle For Users Without AI-LAB Access
 
 The completed AI-LAB run is available as `ai_lab/upload_bundle_next_ready/`
 and as the archive `ai_lab/upload_bundle_next_ready.tar.gz`.
