@@ -1,0 +1,62 @@
+[
+  {
+    "model_name": "logistic_regression",
+    "comparison_type": "compact_without_persistence",
+    "baseline_feature_set": "baseline",
+    "ai_feature_set": "ai_compact",
+    "baseline_validation_macro_f1": 0.3051948051948052,
+    "ai_validation_macro_f1": 0.2387096774193548,
+    "validation_macro_f1_lift": -0.0664851277754503,
+    "baseline_test_macro_f1": 0.3230817023920472,
+    "ai_test_macro_f1": 0.315359477124183,
+    "test_macro_f1_lift": -0.0077222252678642,
+    "baseline_test_accuracy": 0.4444444444444444,
+    "ai_test_accuracy": 0.3888888888888889,
+    "test_accuracy_lift": -0.0555555555555555
+  },
+  {
+    "model_name": "logistic_regression",
+    "comparison_type": "compact_with_persistence",
+    "baseline_feature_set": "baseline_with_persistence",
+    "ai_feature_set": "ai_compact_with_persistence",
+    "baseline_validation_macro_f1": 0.323062558356676,
+    "ai_validation_macro_f1": 0.2120257075763193,
+    "validation_macro_f1_lift": -0.1110368507803566,
+    "baseline_test_macro_f1": 0.2292282430213464,
+    "ai_test_macro_f1": 0.2007469654528478,
+    "test_macro_f1_lift": -0.0284812775684986,
+    "baseline_test_accuracy": 0.3055555555555556,
+    "ai_test_accuracy": 0.25,
+    "test_accuracy_lift": -0.0555555555555555
+  },
+  {
+    "model_name": "xgboost",
+    "comparison_type": "compact_without_persistence",
+    "baseline_feature_set": "baseline",
+    "ai_feature_set": "ai_compact",
+    "baseline_validation_macro_f1": 0.2849181469871125,
+    "ai_validation_macro_f1": 0.1744271988174427,
+    "validation_macro_f1_lift": -0.1104909481696697,
+    "baseline_test_macro_f1": 0.2166666666666666,
+    "ai_test_macro_f1": 0.2634920634920635,
+    "test_macro_f1_lift": 0.0468253968253968,
+    "baseline_test_accuracy": 0.3055555555555556,
+    "ai_test_accuracy": 0.3611111111111111,
+    "test_accuracy_lift": 0.0555555555555555
+  },
+  {
+    "model_name": "xgboost",
+    "comparison_type": "compact_with_persistence",
+    "baseline_feature_set": "baseline_with_persistence",
+    "ai_feature_set": "ai_compact_with_persistence",
+    "baseline_validation_macro_f1": 0.2787878787878788,
+    "ai_validation_macro_f1": 0.1744271988174427,
+    "validation_macro_f1_lift": -0.104360679970436,
+    "baseline_test_macro_f1": 0.1913043478260869,
+    "ai_test_macro_f1": 0.2354497354497354,
+    "test_macro_f1_lift": 0.0441453876236484,
+    "baseline_test_accuracy": 0.2777777777777778,
+    "ai_test_accuracy": 0.3055555555555556,
+    "test_accuracy_lift": 0.0277777777777777
+  }
+]

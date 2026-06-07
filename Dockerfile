@@ -24,8 +24,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy the full project into the container
 COPY . .
 
-# Expose the FastAPI port
+# Expose the FastAPI and Streamlit ports
 EXPOSE 8000
+EXPOSE 8501
 
 # Default command: start FastAPI
 CMD ["uvicorn", "app.api:app", "--host", "0.0.0.0", "--port", "8000"]

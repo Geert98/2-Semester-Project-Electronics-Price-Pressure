@@ -1,40 +1,32 @@
 from __future__ import annotations
 
-# This file defines the Streamlit frontend for the project.
-#
-# In the overall system architecture, Streamlit acts as the user-facing layer.
-# It does not run the machine learning logic directly. Instead, it communicates
-# with the FastAPI backend, which serves the pipeline and saved artifacts.
-#
-# The dashboard currently supports:
-# - checking whether the backend API is running
-# - displaying the latest prediction
-# - displaying model evaluation metrics
-# - triggering the full pipeline from a button
-# - displaying a summary of the latest pipeline run
-#
-# This makes the project easier to demonstrate and interact with than using
-# API documentation alone.
+import os
+import json
+from typing import Any
 
+import pandas as pd
 import requests
 import streamlit as st
-import pandas as pd
 
-# Base URL of the FastAPI backend.
-# The Streamlit app expects the API to be running locally on port 8000.
-API_BASE_URL = "http://127.0.0.1:8000"
+DEFAULT_API_BASE_URL = "http://127.0.0.1:8000"
+API_BASE_URL = os.getenv("API_BASE_URL", DEFAULT_API_BASE_URL)
 
 
 # Configure the overall Streamlit page.
 # layout="wide" gives more horizontal space for charts and metric boxes.
 st.set_page_config(
     page_title="Electronics Price Pressure Dashboard",
-    page_icon="📈",
+    page_icon=":bar_chart:",
     layout="wide",
 )
 
 
-def fetch_json(endpoint: str, method: str = "GET", timeout: int = 300) -> dict:
+def fetch_json(
+    endpoint: str,
+    method: str = "GET",
+    timeout: int = 180,
+    params: dict[str, Any] | None = None,
+) -> dict:
     """
     Send a request to the FastAPI backend and return the JSON response.
 
@@ -67,7 +59,7 @@ def fetch_json(endpoint: str, method: str = "GET", timeout: int = 300) -> dict:
     url = f"{API_BASE_URL}{endpoint}"
 
     if method == "GET":
-        response = requests.get(url, timeout=timeout)
+        response = requests.get(url, timeout=timeout, params=params)
     elif method == "POST":
         response = requests.post(url, timeout=timeout)
     else:
@@ -127,8 +119,10 @@ def render_prediction(prediction: dict) -> None:
     # Visualize the class probabilities as a simple bar chart.
     st.bar_chart(probs_df.set_index("class"))
 
+    st.caption("Source: artifacts/predictions/latest_prediction.csv (served by API)")
 
-def render_metrics(metrics: dict) -> None:
+
+def render_metrics(metrics: dict, distribution_scope: str = "All") -> None:
     """
     Render the model metrics section of the dashboard.
 
@@ -162,37 +156,44 @@ def render_metrics(metrics: dict) -> None:
     col3.metric("Train Rows", n_rows_train if n_rows_train is not None else "N/A")
     col4.metric("Test Rows", n_rows_test if n_rows_test is not None else "N/A")
 
-    st.write("Class distributions")
-
-    # Create three columns to show class balance in train, test, and predictions.
-    dist_cols = st.columns(3)
-
     train_dist = metrics.get("train_class_distribution", {})
     test_dist = metrics.get("test_class_distribution", {})
     pred_dist = metrics.get("predicted_class_distribution", {})
 
-    with dist_cols[0]:
-        st.markdown("**Train distribution**")
-        st.json(train_dist)
+    st.write("Class distributions")
+    distributions = {
+        "Train": train_dist,
+        "Test": test_dist,
+        "Predicted": pred_dist,
+    }
+    active_labels = [distribution_scope] if distribution_scope != "All" else ["Train", "Test", "Predicted"]
+    dist_cols = st.columns(len(active_labels))
 
-    with dist_cols[1]:
-        st.markdown("**Test distribution**")
-        st.json(test_dist)
+    for idx, label in enumerate(active_labels):
+        with dist_cols[idx]:
+            st.markdown(f"**{label} distribution**")
+            st.json(distributions.get(label, {}))
 
-    with dist_cols[2]:
-        st.markdown("**Predicted distribution**")
-        st.json(pred_dist)
-
-    # Display the confusion matrix if it is available.
     confusion = metrics.get("confusion_matrix")
+    labels = metrics.get("class_labels") or ["low", "medium", "high"]
     if confusion:
         st.markdown("**Confusion matrix**")
-        confusion_df = pd.DataFrame(
-            confusion,
-            index=["low", "medium", "high"],
-            columns=["low", "medium", "high"],
-        )
+        confusion_df = pd.DataFrame(confusion, index=labels, columns=labels)
         st.dataframe(confusion_df, use_container_width=True)
+
+
+def render_classification_report(metrics: dict) -> None:
+    report = metrics.get("classification_report")
+    if not isinstance(report, dict) or not report:
+        st.info("No classification report available in train_metrics.json.")
+        return
+
+    report_df = pd.DataFrame(report).transpose().reset_index().rename(columns={"index": "label"})
+    st.dataframe(report_df, use_container_width=True, hide_index=True)
+
+
+def render_raw_metrics(metrics: dict) -> None:
+    st.code(json.dumps(metrics, indent=2), language="json")
 
 
 def render_pipeline_summary(summary: dict) -> None:
@@ -238,48 +239,44 @@ def render_pipeline_summary(summary: dict) -> None:
         st.json(metric_summary)
 
 
-def render_news_articles(response: dict) -> None:
-    """
-    Render a compact table of recently ingested news articles.
-    """
-    st.subheader("Recent Ingested Articles")
-
-    articles = response.get("articles", [])
-    if not articles:
-        st.info("No news articles found yet. Run the pipeline first.")
-        return
-
-    articles_df = pd.DataFrame(articles)
-    visible_columns = [
-        col
-        for col in ["published_at", "provider", "source", "title", "url", "language"]
-        if col in articles_df.columns
-    ]
-    articles_df = articles_df[visible_columns]
-
-    st.dataframe(
-        articles_df,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "published_at": st.column_config.TextColumn("Published"),
-            "provider": st.column_config.TextColumn("Provider"),
-            "source": st.column_config.TextColumn("Source"),
-            "title": st.column_config.TextColumn("Title", width="large"),
-            "url": st.column_config.LinkColumn("Article"),
-            "language": st.column_config.TextColumn("Lang"),
-        },
-    )
+def render_empty_state(message: str) -> None:
+    st.warning(message)
+    st.info("Run POST /run-pipeline from the API or use the sidebar button to generate artifacts.")
 
 
 # Main page title and short description.
 st.title("Electronics Price Pressure Dashboard")
-st.write("Interactive dashboard for the electronics price pressure pipeline and API.")
+st.write("Interactive dashboard for model artifacts served by the FastAPI backend.")
+st.caption("Use the Streamlit sidebar page navigation to open Model Comparisons.")
 
 # Sidebar controls for interacting with the backend.
 with st.sidebar:
     st.header("Controls")
-    st.caption("Make sure the FastAPI server is running on http://127.0.0.1:8000")
+    st.caption(f"API base URL: {API_BASE_URL}")
+
+    metrics_source = st.selectbox("Metrics file", options=["train_metrics.json"], index=0)
+    st.caption(f"Using metrics source: {metrics_source}")
+
+    distribution_scope = st.selectbox(
+        "Distribution window",
+        options=["All", "Train", "Test", "Predicted"],
+        index=0,
+    )
+
+    metric_views = [
+        "Summary cards",
+        "Class distributions",
+        "Confusion matrix",
+        "Classification report",
+        "Raw JSON",
+    ]
+    selected_views = st.multiselect(
+        "Metric views",
+        options=metric_views,
+        default=["Summary cards", "Class distributions", "Confusion matrix"],
+    )
+
+    include_metrics_payload = st.toggle("Include metrics in unified /results call", value=True)
 
     # Button to trigger the full pipeline through the API.
     if st.button("Run Pipeline", use_container_width=True):
@@ -308,24 +305,56 @@ except Exception as exc:
     st.error(f"Could not connect to API: {exc}")
     st.stop()
 
-# Create the main two-column dashboard layout.
-left_col, right_col = st.columns([1.2, 1])
+results_data = {}
+prediction = None
+metrics = None
 
-# Left column: latest prediction and class probabilities.
-with left_col:
+try:
+    results_data = fetch_json(
+        "/results",
+        params={"include_metrics": str(include_metrics_payload).lower()},
+    )
+    prediction = results_data.get("prediction")
+    metrics = results_data.get("metrics")
+except Exception as exc:
+    st.warning(f"Could not load unified results endpoint: {exc}")
+
+if prediction is None:
     try:
         prediction_response = fetch_json("/latest-prediction")
-        render_prediction(prediction_response["prediction"])
+        prediction = prediction_response.get("prediction")
     except Exception as exc:
-        st.warning(f"Could not load latest prediction: {exc}")
+        render_empty_state(f"Could not load latest prediction: {exc}")
 
-# Right column: model evaluation metrics.
-with right_col:
+if metrics is None and include_metrics_payload:
     try:
         metrics_response = fetch_json("/metrics")
-        render_metrics(metrics_response["metrics"])
+        metrics = metrics_response.get("metrics")
     except Exception as exc:
         st.warning(f"Could not load metrics: {exc}")
+
+left_col, right_col = st.columns([1.1, 1.2])
+
+with left_col:
+    if prediction:
+        render_prediction(prediction)
+
+with right_col:
+    if not metrics:
+        st.info("Metrics were not returned for the current selection.")
+    else:
+        st.subheader("Metrics Explorer")
+
+        if "Summary cards" in selected_views or "Class distributions" in selected_views or "Confusion matrix" in selected_views:
+            render_metrics(metrics, distribution_scope=distribution_scope)
+
+        if "Classification report" in selected_views:
+            st.markdown("**Classification report**")
+            render_classification_report(metrics)
+
+        if "Raw JSON" in selected_views:
+            st.markdown("**Raw train metrics JSON**")
+            render_raw_metrics(metrics)
 
 # If the pipeline was run from the dashboard during this session,
 # display a summary of that pipeline execution below the main panels.
@@ -334,8 +363,4 @@ if "pipeline_result" in st.session_state:
     render_pipeline_summary(st.session_state["pipeline_result"])
 
 st.divider()
-try:
-    articles_response = fetch_json("/news-articles?limit=50&cleaned=true")
-    render_news_articles(articles_response)
-except Exception as exc:
-    st.warning(f"Could not load ingested articles: {exc}")
+st.caption("Metrics source: artifacts/metrics/train_metrics.json (served by API)")

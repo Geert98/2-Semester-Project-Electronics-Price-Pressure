@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Model comparisons</title>
+    <style>
+        :root {
+            --bg: #0b1020;
+            --panel: #121a2b;
+            --panel-2: #182338;
+            --text: #f3f4f6;
+            --muted: #b6c2d1;
+            --accent: #4ade80;
+            --accent-2: #60a5fa;
+            --border: #263247;
+            --danger: #f87171;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+        .container { max-width: 1300px; margin: 0 auto; padding: 30px 20px 48px; }
+        .header h1 { margin: 0 0 8px; font-size: 2.3rem; }
+        .header p { margin: 0; color: var(--muted); }
+        .nav { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .nav a {
+            color: #dbeafe;
+            background: #1f2a44;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            text-decoration: none;
+            padding: 8px 14px;
+            font-size: 0.92rem;
+        }
+        .status {
+            margin-top: 18px;
+            background: rgba(74, 222, 128, 0.15);
+            border: 1px solid rgba(74, 222, 128, 0.35);
+            color: #d1fae5;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; margin-top: 24px; }
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            margin-top: 24px;
+        }
+        .panel h2 { margin: 0 0 16px; font-size: 1.65rem; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+        .metric-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+        .metric-label { font-size: 0.9rem; color: var(--muted); margin-bottom: 7px; }
+        .metric-value { font-size: 1.7rem; font-weight: 700; }
+        .subsection-title { margin: 20px 0 10px; font-size: 1.1rem; font-weight: 700; }
+        .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .table-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+        th { color: var(--muted); font-weight: 600; }
+        .bar-row { margin-bottom: 12px; }
+        .bar-label { display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--muted); }
+        .bar-track { background: #0f172a; border: 1px solid var(--border); border-radius: 999px; height: 18px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
+        .matrix-table th, .matrix-table td { text-align: center; }
+        .mini-bar-track { height: 12px; background: #0f172a; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+        .mini-bar-fill { height: 100%; border-radius: 999px; }
+        .volume-fill { background: var(--accent-2); }
+        .lift-positive { color: #2E8B57; font-weight: 700; }
+        .lift-negative { color: #B22222; font-weight: 700; }
+        .footer { margin-top: 26px; color: var(--muted); font-size: 0.95rem; }
+        @media (max-width: 1000px) {
+            .grid { grid-template-columns: 1fr; }
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .three-col { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            .metrics-grid { grid-template-columns: 1fr; }
+            .metric-value { font-size: 1.35rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>Model comparisons</h1>
+            <p>Static comparison report generated from metrics artifacts.</p>
+            <div class='nav'><a href='index.html'>Main dashboard</a><a href='model-comparisons.html'>Model comparisons</a></div>
+            <div class='status'>Static pages generated from pipeline artifacts.</div>
+        </div>
+        
+    <section class='panel'>
+        <h2>Grouped by feature + model</h2>
+        <p style='color:#b6c2d1;margin-top:0;'>Order follows feature set and model pairing used in the Streamlit app.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature set</th><th>Model name</th><th>Feature count</th>
+                    <th>Validation accuracy</th><th>Validation macro f1</th><th>Test accuracy</th><th>Test macro f1</th>
+                </tr>
+            </thead>
+            <tbody><tr><td>Baseline</td><td>Logistic regression</td><td>14</td><td>0.3611</td><td>0.3052</td><td>0.4444</td><td>0.3231</td></tr>
+<tr><td>Baseline</td><td>Xgboost</td><td>14</td><td>0.3611</td><td>0.2849</td><td>0.3056</td><td>0.2167</td></tr>
+<tr><td>Baseline with persistence</td><td>Logistic regression</td><td>18</td><td>0.3611</td><td>0.3231</td><td>0.3056</td><td>0.2292</td></tr>
+<tr><td>Baseline with persistence</td><td>Xgboost</td><td>18</td><td>0.3611</td><td>0.2788</td><td>0.2778</td><td>0.1913</td></tr>
+<tr><td>Ai compact</td><td>Logistic regression</td><td>51</td><td>0.2500</td><td>0.2387</td><td>0.3889</td><td>0.3154</td></tr>
+<tr><td>Ai compact</td><td>Xgboost</td><td>51</td><td>0.2500</td><td>0.1744</td><td>0.3611</td><td>0.2635</td></tr>
+<tr><td>Ai compact with persistence</td><td>Logistic regression</td><td>55</td><td>0.2222</td><td>0.2120</td><td>0.2500</td><td>0.2007</td></tr>
+<tr><td>Ai compact with persistence</td><td>Xgboost</td><td>55</td><td>0.2500</td><td>0.1744</td><td>0.3056</td><td>0.2354</td></tr></tbody>
+        </table>
+    </section>
+
+    <section class='panel'>
+        <h2>Highest score leaderboard</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature set</th><th>Model name</th><th>Feature count</th>
+                    <th>Validation accuracy</th><th>Validation macro f1</th><th>Test accuracy</th><th>Test macro f1</th>
+                </tr>
+            </thead>
+            <tbody><tr><td>Baseline</td><td>Logistic regression</td><td>14</td><td>0.3611</td><td>0.3052</td><td>0.4444</td><td>0.3231</td></tr>
+<tr><td>Ai compact</td><td>Logistic regression</td><td>51</td><td>0.2500</td><td>0.2387</td><td>0.3889</td><td>0.3154</td></tr>
+<tr><td>Ai compact</td><td>Xgboost</td><td>51</td><td>0.2500</td><td>0.1744</td><td>0.3611</td><td>0.2635</td></tr>
+<tr><td>Ai compact with persistence</td><td>Xgboost</td><td>55</td><td>0.2500</td><td>0.1744</td><td>0.3056</td><td>0.2354</td></tr>
+<tr><td>Baseline with persistence</td><td>Logistic regression</td><td>18</td><td>0.3611</td><td>0.3231</td><td>0.3056</td><td>0.2292</td></tr>
+<tr><td>Baseline</td><td>Xgboost</td><td>14</td><td>0.3611</td><td>0.2849</td><td>0.3056</td><td>0.2167</td></tr>
+<tr><td>Ai compact with persistence</td><td>Logistic regression</td><td>55</td><td>0.2222</td><td>0.2120</td><td>0.2500</td><td>0.2007</td></tr>
+<tr><td>Baseline with persistence</td><td>Xgboost</td><td>18</td><td>0.3611</td><td>0.2788</td><td>0.2778</td><td>0.1913</td></tr></tbody>
+        </table>
+    </section>
+
+    <section class='panel'>
+        <h2>AI lift summary</h2>
+        <div class='metrics-grid'>
+            <div class='metric-card'><div class='metric-label'>Positive AI test macro f1 lift</div><div class='metric-value'>2</div></div>
+            <div class='metric-card'><div class='metric-label'>Neutral lift</div><div class='metric-value'>0</div></div>
+            <div class='metric-card'><div class='metric-label'>Negative lift</div><div class='metric-value'>2</div></div>
+            <div class='metric-card'><div class='metric-label'>Rows</div><div class='metric-value'>4</div></div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Model name</th><th>Comparison type</th><th>Baseline feature set</th><th>AI feature set</th>
+                    <th>Test macro f1 lift</th><th>Test accuracy lift</th>
+                </tr>
+            </thead>
+            <tbody><tr><td>Logistic regression</td><td>Compact without persistence</td><td>Baseline</td><td>Ai compact</td><td class='lift-negative'>-0.0077</td><td>-0.0556</td></tr>
+<tr><td>Logistic regression</td><td>Compact with persistence</td><td>Baseline with persistence</td><td>Ai compact with persistence</td><td class='lift-negative'>-0.0285</td><td>-0.0556</td></tr>
+<tr><td>Xgboost</td><td>Compact without persistence</td><td>Baseline</td><td>Ai compact</td><td class='lift-positive'>0.0468</td><td>0.0556</td></tr>
+<tr><td>Xgboost</td><td>Compact with persistence</td><td>Baseline with persistence</td><td>Ai compact with persistence</td><td class='lift-positive'>0.0441</td><td>0.0278</td></tr></tbody>
+        </table>
+    </section>
+    
+        <div class='footer'></div>
+    </div>
+</body>
+</html>
