@@ -35,6 +35,17 @@ Pages links:
 
 Note: article-level news content and article URLs are intentionally excluded from Pages output. Only model artifacts and aggregate signal tables are published.
 
+### AI-LAB Evidence Bundle For Examiners
+
+The completed AI-LAB run is available as `ai_lab/upload_bundle_next_ready/`
+and as the archive `ai_lab/upload_bundle_next_ready.tar.gz`.
+
+**[Download/verify the completed AI-LAB upload bundle](ai_lab/OFFLINE_BUNDLE.md)**
+
+This bundle contains the generated AI-LAB inputs, enrichment outputs, judge
+outputs, and logs from the finished run. It is shared separately from Git
+because the input files contain article text.
+
 ---
 
 ## Repository Structure
