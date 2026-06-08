@@ -220,11 +220,11 @@ It does not run LLM enrichment itself.
 #### 1. Clone the repository (local copy)
 
 ```bash
-git clone https://github.com/Geert98/Data-engineering-exam-April-2026/
-cd PASTE_YOUR_REPOSITORY_NAME_HERE
+git clone https://github.com/Geert98/2-Semester-Project-Electronics-Price-Pressure.git
+cd 2-Semester-Project-Electronics-Price-Pressure
 ```
 
-#### 2. Create a new or use exiting environment
+#### 2. Create a new or use existing environment
 Example:
 ```bash
 conda create -n DataScience python=3.12 -y
@@ -384,7 +384,7 @@ http://127.0.0.1:8000/docs
 
 ---
 
-## Github Actions
+## GitHub Actions
 This repository includes a workflow in:
 ```bash
 .github/workflows/pipeline.yml
@@ -420,6 +420,6 @@ GUARDIAN_API_KEY
 
 ### Authors
 
-Anders Geert: **[Github profile](https://github.com/Geert98)**
+Anders Geert: **[GitHub profile](https://github.com/Geert98)**
 
-Andreas K. B. Jensen **[Github profile](https://github.com/Dun3AAU)**
+Andreas K. B. Jensen: **[GitHub profile](https://github.com/Dun3AAU)**
